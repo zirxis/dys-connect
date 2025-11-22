@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرسائل والإشعارات - DYS-CONNECT</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-red': '#C41E3A',
+                        'secondary-red': '#E85A4F',
+                        'accent-orange': '#F28B30',
+                        'warm-beige': '#F5F1E8',
+                        'deep-brown': '#8B4513',
+                        'soft-cream': '#FDF6E3',
+                        'muted-gold': '#D4AF37',
+                        'gentle-gray': '#6C757D'
+                    },
+                    fontFamily: {
+                        'cairo': ['Cairo', 'sans-serif'],
+                        'amiri': ['Amiri', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Amiri', serif;
+            background-color: #F5F1E8;
+        }
+        
+        .chat-container {
+            height: calc(100vh - 200px);
+            min-height: 500px;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            word-wrap: break-word;
+            animation: messageIn 0.3s ease-out;
+        }
+        
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message-sent {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message-received {
+            background: white;
+            color: #8B4513;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .contact-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .contact-item:hover {
+            background-color: rgba(196, 30, 58, 0.05);
+        }
+        
+        .contact-item.active {
+            background-color: rgba(196, 30, 58, 0.1);
+            border-right: 4px solid #C41E3A;
+        }
+        
+        .online-indicator {
+            width: 8px;
+            height: 8px;
+            background-color: #10B981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .typing-indicator {
+            display: none;
+            animation: typing 1.5s infinite;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0.3; }
+            30% { opacity: 1; }
+        }
+        
+        .notification-badge {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            color: white;
+            font-size: 0.75rem;
+            min-width: 1.25rem;
+            height: 1.25rem;
+        }
+        
+        .search-input {
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #A01729 0%, #D64541 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.3);
+        }
+        
+        .message-input {
+            transition: all 0.3s ease;
+        }
+        
+        .message-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.15);
+        }
+        
+        .quick-reply {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .quick-reply:hover {
+            transform: scale(1.05);
+            background-color: rgba(196, 30, 58, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-warm-beige">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-sm shadow-lg fixed w-full top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-primary-red font-cairo">DYS-CONNECT</a>
+                </div>
+                
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="dashboard.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">لوحة التحكم</a>
+                        <a href="map.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الخريطة التفاعلية</a>
+                        <a href="library.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">المكتبة العلمية</a>
+                        <a href="settings.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الإعدادات</a>
+                    </div>
+                </div>
+                
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-deep-brown hover:text-primary-red">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-16 min-h-screen">
+        <!-- Header -->
+        <div class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="text-center">
+                    <h1 class="text-3xl font-bold text-deep-brown font-cairo mb-2">الرسائل والإشعارات</h1>
+                    <p class="text-gentle-gray font-amiri">تواصل مع الفريق التربوي وتابع آخر التحديثات</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Contacts Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-2xl shadow-lg h-full">
+                        <!-- Search -->
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="relative">
+                                <input type="text" id="contacts-search" placeholder="البحث عن جهة اتصال..."
+                                       class="search-input w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                <svg class="absolute left-3 top-3.5 h-5 w-5 text-gentle-gray" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <!-- Contacts List -->
+                        <div id="contacts-list" class="overflow-y-auto" style="max-height: 400px;">
+                            <!-- Contacts will be loaded here -->
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="p-4 border-t border-gray-200">
+                            <button onclick="newConversation()" class="w-full btn-primary text-white py-3 rounded-lg text-sm mb-2">
+                                ➕ محادثة جديدة
+                            </button>
+                            <button onclick="createGroup()" class="w-full border border-primary-red text-primary-red hover:bg-primary-red hover:text-white py-3 rounded-lg text-sm transition-colors">
+                                👥 إنشاء مجموعة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat Area -->
+                <div class="lg:col-span-3">
+                    <div class="bg-white rounded-2xl shadow-lg h-full flex flex-col">
+                        <!-- Chat Header -->
+                        <div id="chat-header" class="p-4 border-b border-gray-200 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div id="current-chat-avatar" class="w-12 h-12 bg-primary-red rounded-full flex items-center justify-center text-white text-xl font-bold mr-3">
+                                    👤
+                                </div>
+                                <div>
+                                    <h3 id="current-chat-name" class="text-lg font-bold text-deep-brown font-cairo">اختر محادثة للبدء</h3>
+                                    <p id="current-chat-status" class="text-sm text-gentle-gray font-amiri">اختر جهة اتصال لبدء المحادثة</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="voiceCall()" class="text-gentle-gray hover:text-primary-red p-2">
+                                    📞
+                                </button>
+                                <button onclick="videoCall()" class="text-gentle-gray hover:text-primary-red p-2">
+                                    📹
+                                </button>
+                                <button onclick="chatInfo()" class="text-gentle-gray hover:text-primary-red p-2">
+                                    ℹ️
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Messages Area -->
+                        <div id="messages-container" class="flex-1 overflow-y-auto p-4">
+                            <div id="messages-list" class="space-y-4">
+                                <!-- Messages will be loaded here -->
+                            </div>
+                            
+                            <!-- Typing Indicator -->
+                            <div id="typing-indicator" class="typing-indicator flex items-center space-x-2 p-3">
+                                <div class="w-2 h-2 bg-gentle-gray rounded-full"></div>
+                                <div class="w-2 h-2 bg-gentle-gray rounded-full"></div>
+                                <div class="w-2 h-2 bg-gentle-gray rounded-full"></div>
+                                <span class="text-sm text-gentle-gray font-amiri">يكتب الآن...</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Message Input -->
+                        <div id="message-input-container" class="p-4 border-t border-gray-200">
+                            <!-- Quick Replies -->
+                            <div id="quick-replies" class="mb-3 flex flex-wrap gap-2 hidden">
+                                <div class="quick-reply px-3 py-1 bg-soft-cream text-gentle-gray rounded-full text-sm" onclick="sendQuickReply('شكراً على المعلومات')">
+                                    شكراً على المعلومات
+                                </div>
+                                <div class="quick-reply px-3 py-1 bg-soft-cream text-gentle-gray rounded-full text-sm" onclick="sendQuickReply('متى تكون الجلسة القادمة؟')">
+                                    متى تكون الجلسة القادمة؟
+                                </div>
+                                <div class="quick-reply px-3 py-1 bg-soft-cream text-gentle-gray rounded-full text-sm" onclick="sendQuickReply('هل يمكنك توضيح أكثر؟')">
+                                    هل يمكنك توضيح أكثر؟
+                                </div>
+                                <div class="quick-reply px-3 py-1 bg-soft-cream text-gentle-gray rounded-full text-sm" onclick="sendQuickReply('سأقوم بالمتابعة')">
+                                    سأقوم بالمتابعة
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-end space-x-3">
+                                <button onclick="attachFile()" class="text-gentle-gray hover:text-primary-red p-2">
+                                    📎
+                                </button>
+                                <div class="flex-1">
+                                    <textarea id="message-input" 
+                                              placeholder="اكتب رسالتك..."
+                                              class="message-input w-full px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-primary-red focus:border-transparent"
+                                              rows="1"></textarea>
+                                </div>
+                                <button onclick="sendMessage()" class="btn-primary text-white px-6 py-3 rounded-lg">
+                                    إرسال
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-deep-brown text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="text-3xl font-bold text-muted-gold font-cairo mb-4">DYS-CONNECT</div>
+                <p class="text-lg font-amiri mb-6">منصة جزائرية للتكفل الذكي والمبكر بالأطفال</p>
+                <div class="border-t border-gray-600 pt-6">
+                    <p class="text-sm font-amiri">© 2025 DYS-CONNECT. جميع الحقوق محفوظة.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Messaging functionality
+        let currentChat = null;
+        let contacts = [];
+        let messages = {};
+        
+        // Sample contacts data
+        const sampleContacts = [
+            { id: 1, name: 'د. سعيدة محمد', role: 'مختص نفسي', avatar: '👩‍⚕️', online: true, lastMessage: 'شكراً على المتابعة', time: 'منذ 5 دقائق', unread: 2 },
+            { id: 2, name: 'أحمد محمد', role: 'معلم لغة عربية', avatar: '🧑‍🏫', online: false, lastMessage: 'سأرسل التقرير غداً', time: 'منذ ساعة', unread: 0 },
+            { id: 3, name: 'فاطمة الزهراء', role: 'أم لطفل يحتاج دعم', avatar: '👩‍👦', online: true, lastMessage: 'هل يمكنك مساعدتي في فهم النتائج؟', time: 'منذ 3 ساعات', unread: 1 },
+            { id: 4, name: 'مدرسة ابن خلدون', role: 'مؤسسة تعليمية', avatar: '🏫', online: false, lastMessage: 'تم استلام الطلب', time: 'منذ يوم', unread: 0 },
+            { id: 5, name: 'د. يوسف الباحث', role: 'باحث في التربية', avatar: '🎓', online: true, lastMessage: 'أرغب في التعاون البحثي', time: 'منذ يومين', unread: 3 }
+        ];
+        
+        // Sample messages data
+        const sampleMessages = {
+            1: [
+                { id: 1, sender: 'them', content: 'مرحباً، كيف كان أداء الطفل في الجلسة الأخيرة؟', time: '10:00 صباحاً', date: 'اليوم' },
+                { id: 2, sender: 'me', content: 'السلام عليكم، كان أداءً جيداً وتحسن ملحوظ في التركيز', time: '10:15 صباحاً', date: 'اليوم' },
+                { id: 3, sender: 'them', content: 'ممتاز! هل يمكنك تزويدي بتقرير مفصل؟', time: '10:20 صباحاً', date: 'اليوم' },
+                { id: 4, sender: 'me', content: 'بالطبع، سأقوم بإعداده خلال اليوم', time: '10:25 صباحاً', date: 'اليوم' }
+            ],
+            2: [
+                { id: 1, sender: 'them', content: 'السلام عليكم، أحتاج إلى استشارتكم في موضوع', time: '9:00 صباحاً', date: 'أمس' },
+                { id: 2, sender: 'me', content: 'وعليكم السلام، تفضل كيف يمكنني مساعدتك؟', time: '9:15 صباحاً', date: 'أمس' }
+            ],
+            3: [
+                { id: 1, sender: 'them', content: 'مرحباً، أحتاج إلى توضيح حول نتائج التقييم', time: '2:00 مساءً', date: 'أمس' },
+                { id: 2, sender: 'me', content: 'مرحباً فاطمة، بالطبع، ما الذي تريدين توضيحه؟', time: '2:15 مساءً', date: 'أمس' }
+            ],
+            4: [
+                { id: 1, sender: 'them', content: 'تم استلام طلب التسجيل بنجاح', time: '11:00 صباحاً', date: 'منذ يومين' }
+            ],
+            5: [
+                { id: 1, sender: 'them', content: 'أرغب في التعاون معكم في دراسة بحثية', time: '3:00 مساءً', date: 'منذ 3 أيام' },
+                { id: 2, sender: 'me', content: 'فكرة رائعة! هل يمكنك إرسال تفاصيل الدراسة؟', time: '3:20 مساءً', date: 'منذ 3 أيام' }
+            ]
+        };
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            contacts = [...sampleContacts];
+            messages = { ...sampleMessages };
+            
+            renderContacts();
+            setupEventListeners();
+            
+            // Auto-select first contact if available
+            if (contacts.length > 0) {
+                selectContact(contacts[0].id);
+            }
+        });
+        
+        function setupEventListeners() {
+            // Message input
+            const messageInput = document.getElementById('message-input');
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            messageInput.addEventListener('input', function() {
+                // Auto-resize textarea
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                
+                // Show/hide quick replies based on input
+                const quickReplies = document.getElementById('quick-replies');
+                if (this.value.length === 0) {
+                    quickReplies.classList.remove('hidden');
+                } else {
+                    quickReplies.classList.add('hidden');
+                }
+            });
+            
+            // Contacts search
+            document.getElementById('contacts-search').addEventListener('input', function() {
+                filterContacts(this.value);
+            });
+        }
+        
+        function renderContacts() {
+            const contactsList = document.getElementById('contacts-list');
+            
+            contactsList.innerHTML = contacts.map(contact => `
+                <div class="contact-item p-4 border-b border-gray-100 ${currentChat === contact.id ? 'active' : ''}" 
+                     onclick="selectContact(${contact.id})">
+                    <div class="flex items-center">
+                        <div class="relative mr-3">
+                            <div class="w-12 h-12 bg-primary-red rounded-full flex items-center justify-center text-white text-xl">
+                                ${contact.avatar}
+                            </div>
+                            ${contact.online ? '<div class="online-indicator absolute -top-1 -right-1"></div>' : ''}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="text-sm font-bold text-deep-brown font-cairo truncate">${contact.name}</h4>
+                                <span class="text-xs text-gentle-gray font-amiri">${contact.time}</span>
+                            </div>
+                            <p class="text-xs text-gentle-gray font-amiri truncate">${contact.role}</p>
+                            <p class="text-xs text-gentle-gray font-amiri truncate">${contact.lastMessage}</p>
+                        </div>
+                        ${contact.unread > 0 ? `
+                            <div class="notification-badge flex items-center justify-center rounded-full text-xs">
+                                ${contact.unread}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function selectContact(contactId) {
+            // Update current chat
+            currentChat = contactId;
+            
+            // Update active state in contacts list
+            document.querySelectorAll('.contact-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Update chat header
+            const contact = contacts.find(c => c.id === contactId);
+            if (contact) {
+                document.getElementById('current-chat-name').textContent = contact.name;
+                document.getElementById('current-chat-status').textContent = contact.online ? 'متصل الآن' : 'غير متصل';
+                document.getElementById('current-chat-avatar').textContent = contact.avatar;
+                
+                // Clear unread messages
+                contact.unread = 0;
+                renderContacts();
+            }
+            
+            // Load messages
+            loadMessages(contactId);
+            
+            // Show/hide input container
+            document.getElementById('message-input-container').classList.remove('hidden');
+        }
+        
+        function loadMessages(contactId) {
+            const messagesList = document.getElementById('messages-list');
+            const contactMessages = messages[contactId] || [];
+            
+            messagesList.innerHTML = contactMessages.map(message => `
+                <div class="message-bubble ${message.sender === 'me' ? 'message-sent' : 'message-received'} p-3 rounded-lg">
+                    <p class="text-sm font-amiri mb-1">${message.content}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs opacity-75">${message.time}</span>
+                        ${message.sender === 'me' ? '<span class="text-xs">✓✓</span>' : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            // Scroll to bottom
+            scrollToBottom();
+        }
+        
+        function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
+            
+            if (!message || !currentChat) return;
+            
+            // Add message to messages array
+            if (!messages[currentChat]) {
+                messages[currentChat] = [];
+            }
+            
+            const newMessage = {
+                id: Date.now(),
+                sender: 'me',
+                content: message,
+                time: new Date().toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' }),
+                date: 'اليوم'
+            };
+            
+            messages[currentChat].push(newMessage);
+            
+            // Clear input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            // Reload messages
+            loadMessages(currentChat);
+            
+            // Update contact last message
+            const contact = contacts.find(c => c.id === currentChat);
+            if (contact) {
+                contact.lastMessage = message.length > 30 ? message.substring(0, 30) + '...' : message;
+                contact.time = 'الآن';
+                renderContacts();
+            }
+            
+            // Simulate typing indicator and response
+            setTimeout(() => {
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    sendAutoResponse();
+                }, 2000);
+            }, 1000);
+        }
+        
+        function sendQuickReply(message) {
+            document.getElementById('message-input').value = message;
+            sendMessage();
+        }
+        
+        function sendAutoResponse() {
+            if (!currentChat) return;
+            
+            const responses = [
+                'شكراً على رسالتك، سأقوم بالمتابعة',
+                'ممتاز! هل يمكنك توضيح أكثر؟',
+                'تمام، سأقوم بالإجراءات اللازمة',
+                'شكراً على المعلومات المفيدة',
+                'سأعود إليك قريباً بالتفاصيل'
+            ];
+            
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            
+            const newMessage = {
+                id: Date.now(),
+                sender: 'them',
+                content: randomResponse,
+                time: new Date().toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' }),
+                date: 'اليوم'
+            };
+            
+            messages[currentChat].push(newMessage);
+            loadMessages(currentChat);
+            
+            // Update contact last message
+            const contact = contacts.find(c => c.id === currentChat);
+            if (contact) {
+                contact.lastMessage = randomResponse;
+                contact.time = 'الآن';
+                renderContacts();
+            }
+        }
+        
+        function showTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'flex';
+            scrollToBottom();
+        }
+        
+        function hideTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'none';
+        }
+        
+        function scrollToBottom() {
+            const container = document.getElementById('messages-container');
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function filterContacts(searchTerm) {
+            const filteredContacts = sampleContacts.filter(contact => 
+                contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                contact.role.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            contacts = filteredContacts;
+            renderContacts();
+        }
+        
+        // Interactive functions
+        function newConversation() {
+            showNotification('جاري فتح نموذج محادثة جديدة...', 'info');
+        }
+        
+        function createGroup() {
+            showNotification('جاري فتح نموذج إنشاء مجموعة...', 'info');
+        }
+        
+        function voiceCall() {
+            if (!currentChat) {
+                showNotification('يرجى اختيار جهة اتصال أولاً', 'error');
+                return;
+            }
+            showNotification('جاري إجراء مكالمة صوتية...', 'info');
+        }
+        
+        function videoCall() {
+            if (!currentChat) {
+                showNotification('يرجى اختيار جهة اتصال أولاً', 'error');
+                return;
+            }
+            showNotification('جاري إجراء مكالمة فيديو...', 'info');
+        }
+        
+        function chatInfo() {
+            if (!currentChat) {
+                showNotification('يرجى اختيار محادثة أولاً', 'error');
+                return;
+            }
+            showNotification('جاري فتح معلومات المحادثة...', 'info');
+        }
+        
+        function attachFile() {
+            showNotification('جاري فتح نموذج إرفاق ملف...', 'info');
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            anime({
+                targets: notification,
+                translateX: [-300, 0],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+            
+            // Remove after delay
+            setTimeout(() => {
+                anime({
+                    targets: notification,
+                    translateX: [0, -300],
+                    opacity: [1, 0],
+                    duration: 300,
+                    easing: 'easeInQuad',
+                    complete: () => notification.remove()
+                });
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DYS-CONNECT - المنصة الجزائرية للتكفل الذكي</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-red': '#C41E3A',
+                        'secondary-red': '#E85A4F',
+                        'accent-orange': '#F28B30',
+                        'warm-beige': '#F5F1E8',
+                        'deep-brown': '#8B4513',
+                        'soft-cream': '#FDF6E3',
+                        'muted-gold': '#D4AF37',
+                        'gentle-gray': '#6C757D'
+                    },
+                    fontFamily: {
+                        'cairo': ['Cairo', 'sans-serif'],
+                        'amiri': ['Amiri', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .animate-slideInDown {
+            animation: slideInDown 0.5s ease-out;
+        }
+        
+        .animate-bounce {
+            animation: bounce 1.5s ease-in-out infinite;
+        }
+        
+        body {
+            font-family: 'Amiri', serif;
+            background-color: #F5F1E8;
+        }
+        
+        .hero-bg {
+            background: linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(232, 90, 79, 0.1) 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(196, 30, 58, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #A01729 0%, #D64541 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.3);
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, #F28B30 0%, #D4AF37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .typewriter {
+            border-right: 2px solid #C41E3A;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { border-color: #C41E3A; }
+            51%, 100% { border-color: transparent; }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-warm-beige">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-sm shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="text-2xl font-bold text-primary-red font-cairo">DYS-CONNECT</div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الرئيسية</a>
+                        <a href="#features" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">المميزات</a>
+                        <a href="#roles" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الأدوار</a>
+                        <a href="dashboard.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">لوحة التحكم</a>
+                        <a href="plans.html" class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium">الأسعار</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-deep-brown hover:text-primary-red">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="#home" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">الرئيسية</a>
+                <a href="#features" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">المميزات</a>
+                <a href="#roles" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">الأدوار</a>
+                <a href="dashboard.html" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">لوحة التحكم</a>
+                <a href="plans.html" class="btn-primary text-white block px-3 py-2 rounded-md text-base font-medium text-center">الأسعار</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg min-h-screen flex items-center pt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-right">
+                    <h1 class="text-5xl lg:text-6xl font-bold text-deep-brown font-cairo mb-6">
+                        <span id="typed-text"></span>
+                    </h1>
+                    <p class="text-xl text-gentle-gray font-amiri mb-8 leading-relaxed">
+                        منصة جزائرية متكاملة تربط بين الأمهات، المعلمين، المختصين، والمؤسسات لدعم التكفل الذكي والمبكر بالأطفال
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <button onclick="scrollToRoles()" class="btn-primary text-white px-8 py-4 rounded-lg text-lg font-medium">
+                            ابدأ الآن
+                        </button>
+                        <a href="#features" class="border-2 border-primary-red text-primary-red hover:bg-primary-red hover:text-white px-8 py-4 rounded-lg text-lg font-medium transition-all">
+                            تعرف أكثر
+                        </a>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="resources/hero-main.png" alt="DYS-CONNECT Platform" class="w-full h-auto rounded-2xl shadow-2xl floating">
+                    <div class="absolute -top-4 -left-4 w-20 h-20 bg-accent-orange rounded-full opacity-20 floating" style="animation-delay: -2s;"></div>
+                    <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-secondary-red rounded-full opacity-10 floating" style="animation-delay: -4s;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl font-bold text-deep-brown font-cairo mb-4">لماذا تختار DYS-CONNECT؟</h2>
+                <p class="text-xl text-gentle-gray font-amiri max-w-3xl mx-auto">
+                    منصة متكاملة تجمع بين التكنولوجيا الحديثة والخبرة التربوية لدعم نمو وتطور الأطفال
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="text-center reveal card-hover bg-soft-cream p-8 rounded-2xl">
+                    <div class="text-5xl mb-4 feature-icon">🧠</div>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">أدوات ذكية</h3>
+                    <p class="text-gentle-gray font-amiri">تلخيص، خرائط ذهنية، تمارين تفاعلية مصممة خصيصاً لدعم التعلم</p>
+                </div>
+                
+                <div class="text-center reveal card-hover bg-soft-cream p-8 rounded-2xl">
+                    <div class="text-5xl mb-4 feature-icon">📋</div>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">استبيان علمي</h3>
+                    <p class="text-gentle-gray font-amiri">أدوات تقييم معيارية للرصد المبكر وتوجيه التكفل المناسب</p>
+                </div>
+                
+                <div class="text-center reveal card-hover bg-soft-cream p-8 rounded-2xl">
+                    <div class="text-5xl mb-4 feature-icon">🗺️</div>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">خريطة تفاعلية</h3>
+                    <p class="text-gentle-gray font-amiri">ربط جغرافي ذكي بين الفاعلين التربويين لضمان دعم محلي فعال</p>
+                </div>
+                
+                <div class="text-center reveal card-hover bg-soft-cream p-8 rounded-2xl">
+                    <div class="text-5xl mb-4 feature-icon">📚</div>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">فضاء أكاديمي</h3>
+                    <p class="text-gentle-gray font-amiri">مكتبة علمية ومنصة بحث تربط الجامعة بالمجتمع المدني</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roles Section -->
+    <section id="roles" class="py-20 bg-warm-beige">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl font-bold text-deep-brown font-cairo mb-4">اختر دورك المناسب</h2>
+                <p class="text-xl text-gentle-gray font-amiri max-w-3xl mx-auto">
+                    كل مستخدم يرى ما يخصه فقط مع واجهة مخصصة حسب الدور والاحتياجات
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Mother Card -->
+                <div class="card-hover bg-white rounded-2xl p-8 shadow-lg reveal">
+                    <div class="text-center mb-6">
+                        <div class="text-6xl mb-4">👩‍👦</div>
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2">أم</h3>
+                        <p class="text-gentle-gray font-amiri">أدوات منزلية، متابعة الطفل، تواصل مع الفريق</p>
+                    </div>
+                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri">
+                        <li>• أدوات تعليمية ذكية</li>
+                        <li>• متابعة تقدم الطفل</li>
+                        <li>• تواصل مباشر مع المعلم</li>
+                        <li>• جدولة الجلسات</li>
+                    </ul>
+                    <button onclick="selectRole('mother')" class="w-full btn-primary text-white py-3 rounded-lg font-medium">
+                        اختيار
+                    </button>
+                </div>
+                
+                <!-- Teacher Card -->
+                <div class="card-hover bg-white rounded-2xl p-8 shadow-lg reveal">
+                    <div class="text-center mb-6">
+                        <div class="text-6xl mb-4">🧑‍🏫</div>
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2">معلم</h3>
+                        <p class="text-gentle-gray font-amiri">استبيان، توصية، متابعة صفية</p>
+                    </div>
+                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri">
+                        <li>• استبيان رصد مبكر</li>
+                        <li>• إدارة قائمة التلاميذ</li>
+                        <li>• توصيات تربوية</li>
+                        <li>• تواصل مع الفريق</li>
+                    </ul>
+                    <button onclick="selectRole('teacher')" class="w-full btn-primary text-white py-3 rounded-lg font-medium">
+                        اختيار
+                    </button>
+                </div>
+                
+                <!-- Specialist Card -->
+                <div class="card-hover bg-white rounded-2xl p-8 shadow-lg reveal">
+                    <div class="text-center mb-6">
+                        <div class="text-6xl mb-4">🧠</div>
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2">مختص</h3>
+                        <p class="text-gentle-gray font-amiri">إدارة الحالات، جلسات، تقارير</p>
+                    </div>
+                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri">
+                        <li>• استلام الحالات المحالة</li>
+                        <li>• إعداد خطط التكفل</li>
+                        <li>• تقارير مهنية</li>
+                        <li>• تقويم الجلسات</li>
+                    </ul>
+                    <button onclick="selectRole('specialist')" class="w-full btn-primary text-white py-3 rounded-lg font-medium">
+                        اختيار
+                    </button>
+                </div>
+                
+                <!-- Institution Card -->
+                <div class="card-hover bg-white rounded-2xl p-8 shadow-lg reveal">
+                    <div class="text-center mb-6">
+                        <div class="text-6xl mb-4">🏫</div>
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2">مؤسسة</h3>
+                        <p class="text-gentle-gray font-amiri">إدارة الفريق، تقارير، إشعارات</p>
+                    </div>
+                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri">
+                        <li>• إدارة الفريق التربوي</li>
+                        <li>• تقارير إجمالية</li>
+                        <li>• إشعارات جماعية</li>
+                        <li>• تخصيص الحسابات</li>
+                    </ul>
+                    <button onclick="selectRole('institution')" class="w-full btn-primary text-white py-3 rounded-lg font-medium">
+                        اختيار
+                    </button>
+                </div>
+                
+                <!-- Researcher Card -->
+                <div class="card-hover bg-white rounded-2xl p-8 shadow-lg reveal lg:col-span-2 md:col-span-1">
+                    <div class="text-center mb-6">
+                        <div class="text-6xl mb-4">🎓</div>
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2">باحث</h3>
+                        <p class="text-gentle-gray font-amiri">طلبات بحث، موافقات، تواصل أكاديمي</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        <ul class="text-right space-y-2 text-gentle-gray font-amiri">
+                            <li>• تقديم طلبات بحث</li>
+                            <li>• الحصول على موافقات أخلاقية</li>
+                        </ul>
+                        <ul class="text-right space-y-2 text-gentle-gray font-amiri">
+                            <li>• الوصول المنظم للحالات</li>
+                            <li>• مكتبة علمية متخصصة</li>
+                        </ul>
+                    </div>
+                    <button onclick="selectRole('researcher')" class="w-full btn-primary text-white py-3 rounded-lg font-medium">
+                        اختيار
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl font-bold text-deep-brown font-cairo mb-4">إحصائيات المنصة</h2>
+                <p class="text-xl text-gentle-gray font-amiri">أرقام تظهر تأثيرنا في المجتمع التربوي</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="text-center reveal">
+                    <div class="text-4xl font-bold text-primary-red font-cairo mb-2" data-count="1500">0</div>
+                    <p class="text-gentle-gray font-amiri">مستخدم نشط</p>
+                </div>
+                <div class="text-center reveal">
+                    <div class="text-4xl font-bold text-primary-red font-cairo mb-2" data-count="850">0</div>
+                    <p class="text-gentle-gray font-amiri">طفل مستفيد</p>
+                </div>
+                <div class="text-center reveal">
+                    <div class="text-4xl font-bold text-primary-red font-cairo mb-2" data-count="120">0</div>
+                    <p class="text-gentle-gray font-amiri">مختص متصل</p>
+                </div>
+                <div class="text-center reveal">
+                    <div class="text-4xl font-bold text-primary-red font-cairo mb-2" data-count="45">0</div>
+                    <p class="text-gentle-gray font-amiri">مؤسسة شريكة</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Welcome Modal -->
+    <div id="welcome-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl mx-4 animate-slideInDown">
+            <div class="p-8 md:p-12 text-center relative">
+                <!-- Close Button -->
+                <button onclick="closeWelcomeModal()" class="absolute top-6 right-6 text-gentle-gray hover:text-primary-red transition-colors">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <!-- Welcome Icon -->
+                <div class="text-7xl mb-6 animate-bounce">👋</div>
+                
+                <!-- Main Welcome Message -->
+                <h2 class="text-4xl font-bold text-primary-red font-cairo mb-6">
+                    مرحبًا بك في DYS-CONNECT
+                </h2>
+                
+                <!-- Subtitle -->
+                <p class="text-2xl font-amiri text-secondary-red mb-6 leading-relaxed">
+                    حيث يبدأ التكفل الذكي والمبكر
+                </p>
+                
+                <!-- About Section -->
+                <div class="bg-soft-cream rounded-2xl p-6 md:p-8 mb-8 text-right">
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-4">عن المنصة</h3>
+                    <p class="text-gentle-gray font-amiri leading-relaxed text-lg">
+                        DYS-CONNECT هي منصة جزائرية متكاملة تربط بين الأمهات والمعلمين والمختصين والمؤسسات لدعم التكفل الذكي والمبكر بالأطفال. 
+                        نحن نؤمن بأن اكتشاف المشاكل مبكراً وتوفير الدعم المناسب يمكن أن يغير حياة الأطفال.
+                    </p>
+                </div>
+                
+                <!-- Key Features Preview -->
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="flex flex-col items-center">
+                        <div class="text-4xl mb-2">🧠</div>
+                        <p class="text-sm font-amiri text-gentle-gray">أدوات ذكية</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="text-4xl mb-2">🤝</div>
+                        <p class="text-sm font-amiri text-gentle-gray">تواصل فعال</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="text-4xl mb-2">📊</div>
+                        <p class="text-sm font-amiri text-gentle-gray">متابعة دقيقة</p>
+                    </div>
+                </div>
+                
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="closeWelcomeModal()" class="btn-primary text-white px-8 py-3 rounded-lg font-medium transition-all hover:shadow-lg">
+                        ابدأ الآن
+                    </button>
+                    <button onclick="scrollToFeaturesFromModal()" class="border-2 border-primary-red text-primary-red hover:bg-primary-red hover:text-white px-8 py-3 rounded-lg font-medium transition-all">
+                        تعرف أكثر
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-deep-brown text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="text-3xl font-bold text-muted-gold font-cairo mb-4">DYS-CONNECT</div>
+                <p class="text-lg font-amiri mb-6">منصة جزائرية للتكفل الذكي والمبكر بالأطفال</p>
+                <div class="border-t border-gray-600 pt-6">
+                    <p class="text-sm font-amiri">© 2025 DYS-CONNECT. جميع الحقوق محفوظة.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>

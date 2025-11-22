@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التسجيل - DYS-CONNECT</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-red': '#C41E3A',
+                        'secondary-red': '#E85A4F',
+                        'accent-orange': '#F28B30',
+                        'warm-beige': '#F5F1E8',
+                        'deep-brown': '#8B4513',
+                        'soft-cream': '#FDF6E3',
+                        'muted-gold': '#D4AF37',
+                        'gentle-gray': '#6C757D'
+                    },
+                    fontFamily: {
+                        'cairo': ['Cairo', 'sans-serif'],
+                        'amiri': ['Amiri', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Amiri', serif;
+            background-color: #F5F1E8;
+        }
+        
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+            animation: slideIn 0.5s ease-in-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+        
+        .input-focus:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #A01729 0%, #D64541 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.3);
+        }
+        
+        .role-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .validation-error {
+            color: #DC3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .validation-success {
+            color: #28A745;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-warm-beige">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-sm shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-primary-red font-cairo">DYS-CONNECT</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="index.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الرئيسية</a>
+                        <a href="dashboard.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">لوحة التحكم</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Registration Form -->
+    <div class="min-h-screen flex items-center justify-center pt-16 pb-8">
+        <div class="max-w-2xl w-full mx-4">
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gentle-gray font-cairo">تقدم التسجيل</span>
+                    <span class="text-sm font-medium text-gentle-gray font-cairo">
+                        <span id="current-step">1</span> من <span id="total-steps">3</span>
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progress-bar" class="progress-bar bg-primary-red h-2 rounded-full" style="width: 33%"></div>
+                </div>
+            </div>
+
+            <!-- Registration Card -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <!-- Step 1: Role Confirmation -->
+                <div id="step-1" class="form-step active">
+                    <div class="text-center mb-8">
+                        <div id="role-icon" class="role-icon"></div>
+                        <h2 class="text-3xl font-bold text-deep-brown font-cairo mb-2">تأكيد الدور</h2>
+                        <p class="text-gentle-gray font-amiri">سجل حسابك كـ <span id="role-title" class="text-primary-red font-bold"></span></p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">البريد الإلكتروني</label>
+                            <input type="email" id="email" name="email" required
+                                   class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                            <div id="email-error" class="validation-error hidden"></div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">كلمة المرور</label>
+                            <input type="password" id="password" name="password" required
+                                   class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                            <div id="password-error" class="validation-error hidden"></div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">تأكيد كلمة المرور</label>
+                            <input type="password" id="confirm-password" name="confirm-password" required
+                                   class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                            <div id="confirm-password-error" class="validation-error hidden"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between mt-8">
+                        <a href="index.html" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            رجوع
+                        </a>
+                        <button onclick="nextStep()" class="btn-primary text-white px-8 py-3 rounded-lg font-medium">
+                            التالي
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Personal Information -->
+                <div id="step-2" class="form-step">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-deep-brown font-cairo mb-2">المعلومات الشخصية</h2>
+                        <p class="text-gentle-gray font-amiri">أكمل بياناتك الشخصية للتسجيل</p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">الاسم الكامل</label>
+                                <input type="text" id="full-name" name="full-name" required
+                                       class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">رقم الهاتف</label>
+                                <input type="tel" id="phone" name="phone" required
+                                       class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">الولاية</label>
+                                <select id="state" name="state" required
+                                        class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                    <option value="">اختر الولاية</option>
+                                    <option value="الجزائر">الجزائر</option>
+                                    <option value="البويرة">البويرة</option>
+                                    <option value="تيزي وزو">تيزي وزو</option>
+                                    <option value="بجاية">بجاية</option>
+                                    <option value="سطيف">سطيف</option>
+                                    <option value="قسنطينة">قسنطينة</option>
+                                    <option value="وهران">وهران</option>
+                                    <option value="عنابة">عنابة</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">البلدية</label>
+                                <input type="text" id="city" name="city" required
+                                       class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                            </div>
+                        </div>
+                        
+                        <!-- Role-specific fields will be added here dynamically -->
+                        <div id="role-specific-fields"></div>
+                    </div>
+                    
+                    <div class="flex justify-between mt-8">
+                        <button onclick="prevStep()" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            السابق
+                        </button>
+                        <button onclick="nextStep()" class="btn-primary text-white px-8 py-3 rounded-lg font-medium">
+                            التالي
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Confirmation -->
+                <div id="step-3" class="form-step">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-deep-brown font-cairo mb-2">تأكيد التسجيل</h2>
+                        <p class="text-gentle-gray font-amiri">راجع بياناتك قبل إتمام التسجيل</p>
+                    </div>
+                    
+                    <div id="confirmation-details" class="bg-soft-cream p-6 rounded-lg mb-6">
+                        <!-- Confirmation details will be populated here -->
+                    </div>
+                    
+                    <div class="space-y-4 mb-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="terms" name="terms" required class="ml-3 text-primary-red focus:ring-primary-red">
+                            <span class="text-sm text-deep-brown font-amiri">
+                                أوافق على <a href="#" class="text-primary-red hover:underline">شروط الاستخدام</a> و<a href="#" class="text-primary-red hover:underline">سياسة الخصوصية</a>
+                            </span>
+                        </label>
+                        
+                        <label class="flex items-center">
+                            <input type="checkbox" id="newsletter" name="newsletter" class="ml-3 text-primary-red focus:ring-primary-red">
+                            <span class="text-sm text-deep-brown font-amiri">أرغب في تلقي newsletters والتحديثات</span>
+                        </label>
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <button onclick="prevStep()" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            السابق
+                        </button>
+                        <button onclick="submitRegistration()" class="btn-primary text-white px-8 py-3 rounded-lg font-medium">
+                            إنشاء الحساب
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div class="text-6xl mb-4">🎉</div>
+            <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-4">تهانينا!</h3>
+            <p class="text-gentle-gray font-amiri mb-6">تم إنشاء حسابك بنجاح. جاري التحويل إلى لوحة التحكم...</p>
+            <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+                <div id="success-progress" class="bg-primary-red h-2 rounded-full transition-all duration-3000" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Registration form functionality
+        let currentStep = 1;
+        const totalSteps = 3;
+        let selectedRole = '';
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            selectedRole = localStorage.getItem('selectedRole') || 'mother';
+            setupRoleForm();
+            updateProgressBar();
+            validateCurrentStep();
+        });
+        
+        function setupRoleForm() {
+            const roleIcon = document.getElementById('role-icon');
+            const roleTitle = document.getElementById('role-title');
+            const roleSpecificFields = document.getElementById('role-specific-fields');
+            
+            const roleData = {
+                mother: { icon: '👩‍👦', title: 'أم' },
+                teacher: { icon: '🧑‍🏫', title: 'معلم' },
+                specialist: { icon: '🧠', title: 'مختص' },
+                institution: { icon: '🏫', title: 'مؤسسة' },
+                researcher: { icon: '🎓', title: 'باحث' }
+            };
+            
+            const role = roleData[selectedRole];
+            if (role) {
+                roleIcon.textContent = role.icon;
+                roleTitle.textContent = role.title;
+                
+                // Add role-specific fields
+                roleSpecificFields.innerHTML = getRoleSpecificFields(selectedRole);
+            }
+        }
+        
+        function getRoleSpecificFields(role) {
+            const fields = {
+                mother: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">عدد الأطفال</label>
+                            <select name="children-count" required class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                <option value="">اختر العدد</option>
+                                <option value="1">1 طفل</option>
+                                <option value="2">2 أطفال</option>
+                                <option value="3">3 أطفال</option>
+                                <option value="4+">4 أطفال أو أكثر</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">أعمار الأطفال</label>
+                            <input type="text" name="children-ages" placeholder="مثال: 5, 8, 12" required
+                                   class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                        </div>
+                    </div>
+                `,
+                teacher: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">المادة التي تدرسها</label>
+                            <select name="subject" required class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                <option value="">اختر المادة</option>
+                                <option value="اللغة العربية">اللغة العربية</option>
+                                <option value="الرياضيات">الرياضيات</option>
+                                <option value="العلوم">العلوم</option>
+                                <option value="اللغة الفرنسية">اللغة الفرنسية</option>
+                                <option value="أخرى">أخرى</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">عدد سنوات الخبرة</label>
+                            <select name="experience" required class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                <option value="">اختر الخبرة</option>
+                                <option value="0-2">0-2 سنوات</option>
+                                <option value="3-5">3-5 سنوات</option>
+                                <option value="6-10">6-10 سنوات</option>
+                                <option value="10+">أكثر من 10 سنوات</option>
+                            </select>
+                        </div>
+                    </div>
+                `,
+                specialist: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">التخصص</label>
+                            <select name="specialty" required class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                <option value="">اختر التخصص</option>
+                                <option value="نفسي">أخصائي نفسي</option>
+                                <option value="أرطوفوني">أخصائي أرطوفوني</option>
+                                <option value="طب نفسي أطفال">طبيب نفسي أطفال</option>
+                                <option value="تربية خاصة">أخصائي تربية خاصة</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">رقم التسجيل المهني</label>
+                            <input type="text" name="license-number" required
+                                   class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                        </div>
+                    </div>
+                `,
+                institution: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">نوع المؤسسة</label>
+                            <select name="institution-type" required class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                <option value="">اختر النوع</option>
+                                <option value="مدسة">مدرسة</option>
+                                <option value="روضة">روضة أطفال</option>
+                                <option value="مركز">مركز تكفل</option>
+                                <option value="جمعية">جمعية أهلية</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">عدد الموظفين</label>
+                            <select name="staff-count" required class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                <option value="">اختر العدد</option>
+                                <option value="1-10">1-10 موظف</option>
+                                <option value="11-50">11-50 موظف</option>
+                                <option value="51-100">51-100 موظف</option>
+                                <option value="100+">أكثر من 100 موظف</option>
+                            </select>
+                        </div>
+                    </div>
+                `,
+                researcher: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">المؤسسة الأكاديمية</label>
+                            <input type="text" name="academic-institution" required
+                                   class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">مجال البحث</label>
+                            <select name="research-field" required class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                <option value="">اختر المجال</option>
+                                <option value="تربية خاصة">تربية خاصة</option>
+                                <option value="علم النفس">علم النفس</option>
+                                <option value="علم النطق">علم النطق</option>
+                                <option value="تعليم">علم التعليم</option>
+                            </select>
+                        </div>
+                    </div>
+                `
+            };
+            
+            return fields[role] || '';
+        }
+        
+        function nextStep() {
+            if (validateCurrentStep()) {
+                if (currentStep < totalSteps) {
+                    document.getElementById(`step-${currentStep}`).classList.remove('active');
+                    currentStep++;
+                    document.getElementById(`step-${currentStep}`).classList.add('active');
+                    updateProgressBar();
+                    
+                    if (currentStep === 3) {
+                        populateConfirmationDetails();
+                    }
+                }
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 1) {
+                document.getElementById(`step-${currentStep}`).classList.remove('active');
+                currentStep--;
+                document.getElementById(`step-${currentStep}`).classList.add('active');
+                updateProgressBar();
+            }
+        }
+        
+        function updateProgressBar() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('current-step').textContent = currentStep;
+        }
+        
+        function validateCurrentStep() {
+            const currentStepElement = document.getElementById(`step-${currentStep}`);
+            const requiredFields = currentStepElement.querySelectorAll('input[required], select[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                const errorElement = document.getElementById(`${field.name}-error`) || document.getElementById(`${field.id}-error`);
+                
+                if (!field.value.trim()) {
+                    showFieldError(field, 'هذا الحقل مطلوب');
+                    isValid = false;
+                } else if (field.type === 'email' && !isValidEmail(field.value)) {
+                    showFieldError(field, 'يرجى إدخال بريد إلكتروني صالح');
+                    isValid = false;
+                } else if (field.id === 'confirm-password' && field.value !== document.getElementById('password').value) {
+                    showFieldError(field, 'كلمات المرور غير متطابقة');
+                    isValid = false;
+                } else {
+                    showFieldSuccess(field);
+                }
+            });
+            
+            return isValid;
+        }
+        
+        function showFieldError(field, message) {
+            field.classList.add('border-red-500');
+            field.classList.remove('border-green-500');
+            
+            const errorElement = document.getElementById(`${field.name}-error`) || document.getElementById(`${field.id}-error`);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+                errorElement.classList.remove('validation-success');
+                errorElement.classList.add('validation-error');
+            }
+        }
+        
+        function showFieldSuccess(field) {
+            field.classList.remove('border-red-500');
+            field.classList.add('border-green-500');
+            
+            const errorElement = document.getElementById(`${field.name}-error`) || document.getElementById(`${field.id}-error`);
+            if (errorElement) {
+                errorElement.textContent = '✓';
+                errorElement.classList.remove('hidden');
+                errorElement.classList.remove('validation-error');
+                errorElement.classList.add('validation-success');
+            }
+        }
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function populateConfirmationDetails() {
+            const confirmationDetails = document.getElementById('confirmation-details');
+            const formData = new FormData();
+            
+            // Collect all form data
+            const inputs = document.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                if (input.value) {
+                    formData.append(input.name, input.value);
+                }
+            });
+            
+            let detailsHTML = '<h3 class="text-lg font-bold text-deep-brown font-cairo mb-4">تفاصيل التسجيل:</h3>';
+            
+            const fieldLabels = {
+                'email': 'البريد الإلكتروني',
+                'full-name': 'الاسم الكامل',
+                'phone': 'رقم الهاتف',
+                'state': 'الولاية',
+                'city': 'البلدية'
+            };
+            
+            for (const [key, value] of formData.entries()) {
+                if (fieldLabels[key] && value) {
+                    detailsHTML += `<div class="flex justify-between mb-2"><span class="text-gentle-gray font-amiri">${fieldLabels[key]}:</span><span class="text-deep-brown font-amiri">${value}</span></div>`;
+                }
+            }
+            
+            detailsHTML += `<div class="flex justify-between mb-2"><span class="text-gentle-gray font-amiri">الدور:</span><span class="text-primary-red font-amiri font-bold">${document.getElementById('role-title').textContent}</span></div>`;
+            
+            confirmationDetails.innerHTML = detailsHTML;
+        }
+        
+        function submitRegistration() {
+            const termsAccepted = document.getElementById('terms').checked;
+            
+            if (!termsAccepted) {
+                showNotification('يرجى الموافقة على شروط الاستخدام', 'error');
+                return;
+            }
+            
+            // Show success modal
+            document.getElementById('success-modal').classList.remove('hidden');
+            document.getElementById('success-modal').classList.add('flex');
+            
+            // Animate progress bar
+            setTimeout(() => {
+                document.getElementById('success-progress').style.width = '100%';
+            }, 500);
+            
+            // Redirect to dashboard
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 3500);
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            anime({
+                targets: notification,
+                translateX: [-300, 0],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+            
+            // Remove after delay
+            setTimeout(() => {
+                anime({
+                    targets: notification,
+                    translateX: [0, -300],
+                    opacity: [1, 0],
+                    duration: 300,
+                    easing: 'easeInQuad',
+                    complete: () => notification.remove()
+                });
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

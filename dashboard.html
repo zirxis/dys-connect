@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - DYS-CONNECT</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-red': '#C41E3A',
+                        'secondary-red': '#E85A4F',
+                        'accent-orange': '#F28B30',
+                        'warm-beige': '#F5F1E8',
+                        'deep-brown': '#8B4513',
+                        'soft-cream': '#FDF6E3',
+                        'muted-gold': '#D4AF37',
+                        'gentle-gray': '#6C757D'
+                    },
+                    fontFamily: {
+                        'cairo': ['Cairo', 'sans-serif'],
+                        'amiri': ['Amiri', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Amiri', serif;
+            background-color: #F5F1E8;
+        }
+        
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.hidden {
+            transform: translateX(100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(196, 30, 58, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #A01729 0%, #D64541 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.3);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(196, 30, 58, 0.1);
+            border-right: 4px solid #C41E3A;
+        }
+        
+        .nav-item.active {
+            background-color: rgba(196, 30, 58, 0.1);
+            border-right: 4px solid #C41E3A;
+            color: #C41E3A;
+        }
+        
+        .notification-dot {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .tool-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid rgba(196, 30, 58, 0.1);
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+        }
+        
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 35;
+        }
+        
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-warm-beige">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-sm shadow-lg fixed w-full top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <button id="sidebar-toggle" class="md:hidden text-deep-brown hover:text-primary-red">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <a href="index.html" class="text-2xl font-bold text-primary-red font-cairo">DYS-CONNECT</a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    
+                    <!-- User Profile -->
+                    <div class="relative">
+                        <button id="profile-btn" class="flex items-center space-x-2 text-deep-brown hover:text-primary-red">
+                            <div class="w-8 h-8 bg-primary-red rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                <span id="user-initial">أ</span>
+                            </div>
+                            <span id="user-name" class="hidden md:block font-medium"></span>
+                        </button>
+                    </div>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="md:hidden text-deep-brown hover:text-primary-red">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="mobile-menu fixed right-0 top-16 h-full w-64 bg-white shadow-lg md:hidden">
+        <div class="p-4 space-y-2">
+            <a href="dashboard.html" class="flex items-center px-4 py-3 text-primary-red bg-soft-cream rounded-lg transition-colors border-r-4 border-primary-red">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                </svg>
+                <span class="font-medium">لوحة التحكم</span>
+            </a>
+            
+            <a href="map.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                </svg>
+                <span class="font-medium">الخريطة التفاعلية</span>
+            </a>
+            
+            <a href="library.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span class="font-medium">المكتبة العلمية</span>
+            </a>
+            
+            <a href="messages.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <span class="font-medium">الرسائل</span>
+            </a>
+            
+            <a href="settings.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                </svg>
+                <span class="font-medium">الإعدادات</span>
+            </a>
+            
+            <hr class="my-4">
+            
+            <a href="index.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12a9 9 0 109 9m.05-10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="font-medium">الرئيسية</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="flex pt-16 min-h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar fixed right-0 top-16 h-full w-64 bg-white shadow-lg z-30 md:relative md:translate-x-0 transform translate-x-full">
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <div id="sidebar-role-icon" class="text-4xl mb-2"></div>
+                    <h3 id="sidebar-role-title" class="text-lg font-bold text-deep-brown font-cairo"></h3>
+                    <p class="text-sm text-gentle-gray font-amiri">لوحة التحكم</p>
+                </div>
+                
+                <nav class="space-y-2">
+                    <a href="#" class="nav-item active flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                        <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v0a2 2 0 01-2 2H10a2 2 0 01-2-2v0z" />
+                        </svg>
+                        <span class="font-medium">الرئيسية</span>
+                    </a>
+                    
+                    <a href="map.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                        <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="font-medium">الخريطة التفاعلية</span>
+                    </a>
+                    
+                    <a href="library.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                        <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span class="font-medium">المكتبة العلمية</span>
+                    </a>
+                    
+                    <a href="messages.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                        <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <span class="font-medium">الرسائل</span>
+                        <span class="notification-dot w-2 h-2 bg-red-500 rounded-full mr-auto"></span>
+                    </a>
+                    
+                    <a href="settings.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                        <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="font-medium">الإعدادات</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 md:mr-64">
+            <main class="p-6">
+                <!-- Dashboard Header -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-deep-brown font-cairo mb-2">لوحة التحكم</h1>
+                    <p class="text-gentle-gray font-amiri">مرحباً بك في منصة DYS-CONNECT</p>
+                </div>
+
+                <!-- Dashboard Content -->
+                <div id="dashboard-content">
+                    <!-- Content will be loaded based on user role -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-deep-brown text-white py-8 md:mr-64">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <p class="text-sm font-amiri">© 2025 DYS-CONNECT. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Dashboard functionality
+        let selectedRole = '';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            selectedRole = localStorage.getItem('selectedRole') || 'mother';
+            initializeDashboard();
+            setupSidebar();
+            setupMobileMenu();
+            loadDashboardContent();
+        });
+        
+        function setupMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('active');
+                });
+                
+                // Close menu when clicking on a link
+                mobileMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenu.classList.remove('active');
+                    });
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                        mobileMenu.classList.remove('active');
+                    }
+                });
+            }
+        }
+        
+        function initializeDashboard() {
+            // Set user info
+            const userInitial = document.getElementById('user-initial');
+            const userName = document.getElementById('user-name');
+            const sidebarRoleIcon = document.getElementById('sidebar-role-icon');
+            const sidebarRoleTitle = document.getElementById('sidebar-role-title');
+            
+            const roleData = {
+                mother: { initial: 'أ', name: 'فاطمة الزهراء', icon: '👩‍👦', title: 'أم' },
+                teacher: { initial: 'م', name: 'أحمد محمد', icon: '🧑‍🏫', title: 'معلم' },
+                specialist: { initial: 'د', name: 'د. سعيدة', icon: '🧠', title: 'مختص' },
+                institution: { initial: 'م', name: 'مدرسة ابن خلدون', icon: '🏫', title: 'مؤسسة' },
+                researcher: { initial: 'ب', name: 'د. يوسف', icon: '🎓', title: 'باحث' }
+            };
+            
+            const userData = roleData[selectedRole] || roleData.mother;
+            
+            if (userInitial) userInitial.textContent = userData.initial;
+            if (userName) userName.textContent = userData.name;
+            if (sidebarRoleIcon) sidebarRoleIcon.textContent = userData.icon;
+            if (sidebarRoleTitle) sidebarRoleTitle.textContent = userData.title;
+        }
+        
+        function setupSidebar() {
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('hidden');
+                });
+            }
+        }
+        
+        function setupMobileMenu() {
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(e) {
+                const sidebar = document.getElementById('sidebar');
+                const sidebarToggle = document.getElementById('sidebar-toggle');
+                
+                if (window.innerWidth < 768 && sidebar && !sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                    sidebar.classList.add('hidden');
+                }
+            });
+        }
+        
+        function loadDashboardContent() {
+            const content = document.getElementById('dashboard-content');
+            const roleContent = getRoleSpecificContent(selectedRole);
+            
+            if (content) {
+                content.innerHTML = roleContent;
+                initializeRoleFeatures();
+            }
+        }
+        
+        function getRoleSpecificContent(role) {
+            const contents = {
+                mother: getMotherDashboard(),
+                teacher: getTeacherDashboard(),
+                specialist: getSpecialistDashboard(),
+                institution: getInstitutionDashboard(),
+                researcher: getResearcherDashboard()
+            };
+            
+            return contents[role] || contents.mother;
+        }
+        
+        function getMotherDashboard() {
+            return `
+                <!-- Mother Dashboard -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Smart Tools -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl p-6 shadow-lg">
+                            <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">الأدوات الذكية</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="tool-card p-4 rounded-lg card-hover cursor-pointer" onclick="goToSmartTools('summary')">
+                                    <div class="text-3xl mb-3">📝</div>
+                                    <h3 class="text-lg font-bold text-deep-brown font-cairo mb-2">تلخيص الدروس</h3>
+                                    <p class="text-sm text-gentle-gray font-amiri">حوّل الدروس إلى ملخصات مبسطة</p>
+                                </div>
+                                
+                                <div class="tool-card p-4 rounded-lg card-hover cursor-pointer" onclick="goToSmartTools('mindmap')">
+                                    <div class="text-3xl mb-3">🧠</div>
+                                    <h3 class="text-lg font-bold text-deep-brown font-cairo mb-2">الخرائط الذهنية</h3>
+                                    <p class="text-sm text-gentle-gray font-amiri">أنشئ خرائط تفاعلية للموضوعات</p>
+                                </div>
+                                
+                                <div class="tool-card p-4 rounded-lg card-hover cursor-pointer" onclick="goToSmartTools('exercises')">
+                                    <div class="text-3xl mb-3">💪</div>
+                                    <h3 class="text-lg font-bold text-deep-brown font-cairo mb-2">التمارين التفاعلية</h3>
+                                    <p class="text-sm text-gentle-gray font-amiri">تمارين تكرارية مع تغذية راجعة</p>
+                                </div>
+                                
+                                <div class="tool-card p-4 rounded-lg card-hover cursor-pointer" onclick="goToSmartTools('writing')">
+                                    <div class="text-3xl mb-3">✍️</div>
+                                    <h3 class="text-lg font-bold text-deep-brown font-cairo mb-2">تدريب الكتابة</h3>
+                                    <p class="text-sm text-gentle-gray font-amiri">مسارات إرشادية لتطوير الكتابة</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Child Progress -->
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">تقدم الطفل</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gentle-gray font-amiri">القراءة</span>
+                                <div class="flex items-center">
+                                    <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="bg-primary-red h-2 rounded-full" style="width: 75%"></div>
+                                    </div>
+                                    <span class="text-sm text-deep-brown font-amiri">75%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-gentle-gray font-amiri">الكتابة</span>
+                                <div class="flex items-center">
+                                    <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="bg-accent-orange h-2 rounded-full" style="width: 60%"></div>
+                                    </div>
+                                    <span class="text-sm text-deep-brown font-amiri">60%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-gentle-gray font-amiri">الحساب</span>
+                                <div class="flex items-center">
+                                    <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="bg-muted-gold h-2 rounded-full" style="width: 85%"></div>
+                                    </div>
+                                    <span class="text-sm text-deep-brown font-amiri">85%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-soft-cream rounded-lg">
+                            <h4 class="font-bold text-deep-brown font-cairo mb-2">آخر توصية</h4>
+                            <p class="text-sm text-gentle-gray font-amiri">يوصى بمتابعة تمارين الكتابة اليومية لمدة 15 دقيقة</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activities -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">آخر النشاطات</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center p-4 bg-soft-cream rounded-lg">
+                            <div class="text-2xl ml-4">📝</div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-deep-brown font-cairo">تم إكمال تمرين تلخيص</h4>
+                                <p class="text-sm text-gentle-gray font-amiri">طفلك أنهى تمرين تلخيص الدرس الخاص بالضرب</p>
+                                <span class="text-xs text-gentle-gray font-amiri">منذ 2 ساعة</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center p-4 bg-soft-cream rounded-lg">
+                            <div class="text-2xl ml-4">💬</div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-deep-brown font-cairo">رسالة جديدة من المعلم</h4>
+                                <p class="text-sm text-gentle-gray font-amiri">المعلم أحمد أرسل ملاحظة حول تقدم طفلك</p>
+                                <span class="text-xs text-gentle-gray font-amiri">منذ 5 ساعات</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center p-4 bg-soft-cream rounded-lg">
+                            <div class="text-2xl ml-4">📅</div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-deep-brown font-cairo">جلسة قادمة</h4>
+                                <p class="text-sm text-gentle-gray font-amiri">جلسة تقييم مع المختص د. سعيدة غداً الساعة 10 صباحاً</p>
+                                <span class="text-xs text-gentle-gray font-amiri">غداً</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getTeacherDashboard() {
+            return `
+                <!-- Teacher Dashboard -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Questionnaire Management -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl p-6 shadow-lg">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-2xl font-bold text-deep-brown font-cairo">إدارة الاستبيانات</h2>
+                                <button onclick="createQuestionnaire()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                                    إنشاء استبيان جديد
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="p-4 border border-gray-200 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-deep-brown font-cairo">استبيان رصد مبكر - الصف الثالث</h3>
+                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">نشط</span>
+                                    </div>
+                                    <p class="text-sm text-gentle-gray font-amiri mb-3">استبيان لتقييم المهارات الأساسية للتلاميذ</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-gentle-gray font-amiri">15 استجابة من 25 تلميذ</span>
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary-red hover:underline text-sm">عرض النتائج</button>
+                                            <button class="text-accent-orange hover:underline text-sm">تعديل</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 border border-gray-200 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-deep-brown font-cairo">تقييم القراءة - الصف الرابع</h3>
+                                        <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">مسودة</span>
+                                    </div>
+                                    <p class="text-sm text-gentle-gray font-amiri mb-3">استبيان لتقييم مستوى القراءة والفهم</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-gentle-gray font-amiri">غير منشور</span>
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary-red hover:underline text-sm">نشر</button>
+                                            <button class="text-accent-orange hover:underline text-sm">تعديل</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Students Overview -->
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">نظرة عامة</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="text-center p-4 bg-soft-cream rounded-lg">
+                                <div class="text-2xl font-bold text-primary-red font-cairo">25</div>
+                                <div class="text-sm text-gentle-gray font-amiri">إجمالي التلاميذ</div>
+                            </div>
+                            
+                            <div class="text-center p-4 bg-soft-cream rounded-lg">
+                                <div class="text-2xl font-bold text-accent-orange font-cairo">3</div>
+                                <div class="text-sm text-gentle-gray font-amiri">يحتاجون متابعة</div>
+                            </div>
+                            
+                            <div class="text-center p-4 bg-soft-cream rounded-lg">
+                                <div class="text-2xl font-bold text-muted-gold font-cairo">8</div>
+                                <div class="text-sm text-gentle-gray font-amiri">جلسات هذا الأسبوع</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <div id="students-chart" style="height: 200px;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Recommendations -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">آخر التوصيات</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center p-4 bg-soft-cream rounded-lg">
+                            <div class="text-2xl ml-4">👨‍👩‍👧‍👦</div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-deep-brown font-cairo">توصية لمتابعة مع مختص</h4>
+                                <p class="text-sm text-gentle-gray font-amiri">التلميذ أحمد يحتاج متابعة مع أخصائي نفسي لتأخر في القراءة</p>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-xs text-gentle-gray font-amiri">منذ 3 ساعات</span>
+                                    <button class="text-primary-red hover:underline text-sm">عرض التفاصيل</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center p-4 bg-soft-cream rounded-lg">
+                            <div class="text-2xl ml-4">📞</div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-deep-brown font-cairo">اتصال هاتفي مع ولي الأمر</h4>
+                                <p class="text-sm text-gentle-gray font-amiri">التوصية بمتابعة التلميذة فاطمة مع والدتها لتحسن ملحوظ</p>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-xs text-gentle-gray font-amiri">منذ يوم</span>
+                                    <button class="text-primary-red hover:underline text-sm">عرض التفاصيل</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getSpecialistDashboard() {
+            return `
+                <!-- Specialist Dashboard -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Cases Management -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl p-6 shadow-lg">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-2xl font-bold text-deep-brown font-cairo">الحالات المحالة</h2>
+                                <button onclick="addNewCase()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                                    إضافة حالة جديدة
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="p-4 border border-gray-200 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-deep-brown font-cairo">أحمد محمد - 8 سنوات</h3>
+                                        <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">عالي الأولوية</span>
+                                    </div>
+                                    <p class="text-sm text-gentle-gray font-amiri mb-3">صعوبات في القراءة والكتابة، تحويل من المعلم أحمد</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-gentle-gray font-amiri">3 جلسات مكتملة</span>
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary-red hover:underline text-sm">عرض الملف</button>
+                                            <button class="text-accent-orange hover:underline text-sm">جدولة جلسة</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 border border-gray-200 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-deep-brown font-cairo">فاطمة الزهراء - 6 سنوات</h3>
+                                        <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">متوسط</span>
+                                    </div>
+                                    <p class="text-sm text-gentle-gray font-amiri mb-3">تأخر في النطق، تحويل من الأم</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-gentle-gray font-amiri">1 جلسة مكتملة</span>
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary-red hover:underline text-sm">عرض الملف</button>
+                                            <button class="text-accent-orange hover:underline text-sm">جدولة جلسة</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 border border-gray-200 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-deep-brown font-cairo">يوسف علي - 10 سنوات</h3>
+                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">منخفض</span>
+                                    </div>
+                                    <p class="text-sm text-gentle-gray font-amiri mb-3">تحسن ملحوظ في القراءة، متابعة دورية</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-gentle-gray font-amiri">5 جلسات مكتملة</span>
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary-red hover:underline text-sm">عرض الملف</button>
+                                            <button class="text-accent-orange hover:underline text-sm">جدولة جلسة</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar -->
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">الجلسات القادمة</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="p-3 bg-soft-cream rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 class="font-bold text-deep-brown font-cairo text-sm">أحمد محمد</h4>
+                                        <p class="text-xs text-gentle-gray font-amiri">غداً - 10:00 صباحاً</p>
+                                    </div>
+                                    <span class="text-xs bg-primary-red text-white px-2 py-1 rounded-full">جلسة تقييم</span>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 bg-soft-cream rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 class="font-bold text-deep-brown font-cairo text-sm">فاطمة الزهراء</h4>
+                                        <p class="text-xs text-gentle-gray font-amiri">بعد غد - 2:00 مساءً</p>
+                                    </div>
+                                    <span class="text-xs bg-accent-orange text-white px-2 py-1 rounded-full">جلسة علاج</span>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 bg-soft-cream rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 class="font-bold text-deep-brown font-cairo text-sm">يوسف علي</h4>
+                                        <p class="text-xs text-gentle-gray font-amiri">السبت - 11:00 صباحاً</p>
+                                    </div>
+                                    <span class="text-xs bg-muted-gold text-white px-2 py-1 rounded-full">متابعة</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-4 btn-primary text-white py-2 rounded-lg text-sm">
+                            عرض التقويم الكامل
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Reports Section -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-deep-brown font-cairo">التقارير المهنية</h2>
+                        <button onclick="generateReport()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                            إنشاء تقرير جديد
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-4 bg-soft-cream rounded-lg text-center">
+                            <div class="text-2xl font-bold text-primary-red font-cairo mb-2">12</div>
+                            <div class="text-sm text-gentle-gray font-amiri">تقرير مكتمل</div>
+                        </div>
+                        
+                        <div class="p-4 bg-soft-cream rounded-lg text-center">
+                            <div class="text-2xl font-bold text-accent-orange font-cairo mb-2">3</div>
+                            <div class="text-sm text-gentle-gray font-amiri">قيد الإعداد</div>
+                        </div>
+                        
+                        <div class="p-4 bg-soft-cream rounded-lg text-center">
+                            <div class="text-2xl font-bold text-muted-gold font-cairo mb-2">28</div>
+                            <div class="text-sm text-gentle-gray font-amiri">جلسة علاجية</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getInstitutionDashboard() {
+            return `
+                <!-- Institution Dashboard -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Team Management -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl p-6 shadow-lg">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-2xl font-bold text-deep-brown font-cairo">إدارة الفريق</h2>
+                                <button onclick="inviteMember()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                                    دعوة عضو جديد
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="p-4 border border-gray-200 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-deep-brown font-cairo">أحمد محمد - معلم</h3>
+                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">نشط</span>
+                                    </div>
+                                    <p class="text-sm text-gentle-gray font-amiri mb-3">معلم لغة عربية - 25 تلميذ</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-gentle-gray font-amiri">آخر نشاط: منذ 2 ساعة</span>
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary-red hover:underline text-sm">عرض التقارير</button>
+                                            <button class="text-accent-orange hover:underline text-sm">تعديل الصلاحيات</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 border border-gray-200 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-deep-brown font-cairo">د. سعيدة - مختص نفسي</h3>
+                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">نشط</span>
+                                    </div>
+                                    <p class="text-sm text-gentle-gray font-amiri mb-3">أخصائي نفسي - 12 حالة</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-gentle-gray font-amiri">آخر نشاط: منذ 1 ساعة</span>
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary-red hover:underline text-sm">عرض التقارير</button>
+                                            <button class="text-accent-orange hover:underline text-sm">تعديل الصلاحيات</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Statistics -->
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">إحصائيات المؤسسة</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="text-center p-4 bg-soft-cream rounded-lg">
+                                <div class="text-2xl font-bold text-primary-red font-cairo mb-2">150</div>
+                                <div class="text-sm text-gentle-gray font-amiri">إجمالي التلاميذ</div>
+                            </div>
+                            
+                            <div class="text-center p-4 bg-soft-cream rounded-lg">
+                                <div class="text-2xl font-bold text-accent-orange font-cairo mb-2">8</div>
+                                <div class="text-sm text-gentle-gray font-amiri">أعضاء الفريق</div>
+                            </div>
+                            
+                            <div class="text-center p-4 bg-soft-cream rounded-lg">
+                                <div class="text-2xl font-bold text-muted-gold font-cairo mb-2">23</div>
+                                <div class="text-sm text-gentle-gray font-amiri">حالات تحت المتابعة</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <div id="institution-chart" style="height: 200px;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reports and Notifications -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Reports -->
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">التقارير الإجمالية</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="p-4 bg-soft-cream rounded-lg">
+                                <h4 class="font-bold text-deep-brown font-cairo mb-2">تقرير شهري - أكتوبر 2025</h4>
+                                <p class="text-sm text-gentle-gray font-amiri mb-3">تحليل شامل لأداء المؤسسة وتقدم التلاميذ</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gentle-gray font-amiri">تم الإنشاء: 01/11/2025</span>
+                                    <button class="text-primary-red hover:underline text-sm">تحميل PDF</button>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 bg-soft-cream rounded-lg">
+                                <h4 class="font-bold text-deep-brown font-cairo mb-2">تقرير الحالات الخاصة</h4>
+                                <p class="text-sm text-gentle-gray font-amiri mb-3">تحليل الحالات التي تحتاج متابعة خاصة</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gentle-gray font-amiri">تم الإنشاء: 28/10/2025</span>
+                                    <button class="text-primary-red hover:underline text-sm">تحميل PDF</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-4 btn-primary text-white py-2 rounded-lg text-sm">
+                            إنشاء تقرير جديد
+                        </button>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">الإشعارات الجماعية</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="p-4 bg-soft-cream rounded-lg">
+                                <h4 class="font-bold text-deep-brown font-cairo mb-2">اجتماع فريق الشهر القادم</h4>
+                                <p class="text-sm text-gentle-gray font-amiri mb-3">تذكير باجتماع الفريق الشهري المقرر يوم 15 نوفمبر</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gentle-gray font-amiri">تم الإرسال: منذ 2 ساعة</span>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">تم التسليم لـ 8/8</span>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 bg-soft-cream rounded-lg">
+                                <h4 class="font-bold text-deep-brown font-cairo mb-2">تحديث جديد في المنصة</h4>
+                                <p class="text-sm text-gentle-gray font-amiri mb-3">إضافة أدوات جديدة لتقييم التقدم</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gentle-gray font-amiri">تم الإرسال: منذ يوم</span>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">تم التسليم لـ 8/8</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="sendNotification()" class="w-full mt-4 btn-primary text-white py-2 rounded-lg text-sm">
+                            إرسال إشعار جديد
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getResearcherDashboard() {
+            return `
+                <!-- Researcher Dashboard -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Research Requests -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl p-6 shadow-lg">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-2xl font-bold text-deep-brown font-cairo">طلبات البحث</h2>
+                                <button onclick="createResearchRequest()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                                    طلب بحث جديد
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="p-4 border border-gray-200 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-deep-brown font-cairo">دراسة فعالية أدوات التكيف</h3>
+                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">معتمد</span>
+                                    </div>
+                                    <p class="text-sm text-gentle-gray font-amiri mb-3">دراسة مقارنة لفاعلية أدوات التكيف مع صعوبات التعلم</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-gentle-gray font-amiri">15 مشارك حتى الآن</span>
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary-red hover:underline text-sm">عرض التفاصيل</button>
+                                            <button class="text-accent-orange hover:underline text-sm">تحميل البيانات</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 border border-gray-200 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-deep-brown font-cairo">تحليل نتائج الاستبيانات</h3>
+                                        <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">قيد المراجعة</span>
+                                    </div>
+                                    <p class="text-sm text-gentle-gray font-amiri mb-3">تحليل إحصائي لنتائج استبيانات الرصد المبكر</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-xs text-gentle-gray font-amiri">بانتظار موافقة اللجنة الأخلاقية</span>
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary-red hover:underline text-sm">عرض التفاصيل</button>
+                                            <button class="text-accent-orange hover:underline text-sm">تعديل الطلب</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Academic Resources -->
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">المكتبة الأكاديمية</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="p-3 bg-soft-cream rounded-lg">
+                                <h4 class="font-bold text-deep-brown font-cairo text-sm mb-1">أدوات تقييم صعوبات التعلم</h4>
+                                <p class="text-xs text-gentle-gray font-amiri mb-2">دراسة حديثة حول أدوات التقييم الحديثة</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gentle-gray font-amiri">2025</span>
+                                    <button class="text-primary-red hover:underline text-xs">تحميل</button>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 bg-soft-cream rounded-lg">
+                                <h4 class="font-bold text-deep-brown font-cairo text-sm mb-1">التكيف مع صعوبات القراءة</h4>
+                                <p class="text-xs text-gentle-gray font-amiri mb-2">مراجعة منهجية للاستراتيجيات الفعالة</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gentle-gray font-amiri">2025</span>
+                                    <button class="text-primary-red hover:underline text-xs">تحميل</button>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 bg-soft-cream rounded-lg">
+                                <h4 class="font-bold text-deep-brown font-cairo text-sm mb-1">الدعم النفسي للأطفال</h4>
+                                <p class="text-xs text-gentle-gray font-amiri mb-2">دليل الممارسات الفضلى</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gentle-gray font-amiri">2025</span>
+                                    <button class="text-primary-red hover:underline text-xs">تحميل</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-4 btn-primary text-white py-2 rounded-lg text-sm">
+                            تصفح المكتبة
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Collaboration Network -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">شبكة التعاون الأكاديمي</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center p-4 bg-soft-cream rounded-lg">
+                            <div class="text-2xl mb-2">🎓</div>
+                            <div class="text-xl font-bold text-primary-red font-cairo mb-1">12</div>
+                            <div class="text-sm text-gentle-gray font-amiri">باحث شريك</div>
+                        </div>
+                        
+                        <div class="text-center p-4 bg-soft-cream rounded-lg">
+                            <div class="text-2xl mb-2">🏫</div>
+                            <div class="text-xl font-bold text-accent-orange font-cairo mb-1">5</div>
+                            <div class="text-sm text-gentle-gray font-amiri">مؤسسة أكاديمية</div>
+                        </div>
+                        
+                        <div class="text-center p-4 bg-soft-cream rounded-lg">
+                            <div class="text-2xl mb-2">📊</div>
+                            <div class="text-xl font-bold text-muted-gold font-cairo mb-1">8</div>
+                            <div class="text-sm text-gentle-gray font-amiri">دراسة مشتركة</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h3 class="text-lg font-bold text-deep-brown font-cairo mb-4">آخر التعاونات</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center p-3 border border-gray-200 rounded-lg">
+                                <div class="text-2xl ml-4">🤝</div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-deep-brown font-cairo text-sm">تعاون مع جامعة الجزائر</h4>
+                                    <p class="text-xs text-gentle-gray font-amiri">دراسة مقارنة حول فعالية أدوات التكيف</p>
+                                </div>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">نشط</span>
+                            </div>
+                            
+                            <div class="flex items-center p-3 border border-gray-200 rounded-lg">
+                                <div class="text-2xl ml-4">📋</div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-deep-brown font-cairo text-sm">مشروع مع فريق بحثي من تيزي وزو</h4>
+                                    <p class="text-xs text-gentle-gray font-amiri">تحليل بيانات الاستبيانات على المستوى الوطني</p>
+                                </div>
+                                <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">قيد التخطيط</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function initializeRoleFeatures() {
+            // Initialize charts based on role
+            if (selectedRole === 'teacher') {
+                initializeStudentsChart();
+            } else if (selectedRole === 'institution') {
+                initializeInstitutionChart();
+            }
+        }
+        
+        function initializeStudentsChart() {
+            const chartElement = document.getElementById('students-chart');
+            if (chartElement && typeof echarts !== 'undefined') {
+                const chart = echarts.init(chartElement);
+                
+                const option = {
+                    title: {
+                        text: 'توزيع التلاميذ حسب المستوى',
+                        textStyle: {
+                            fontSize: 14,
+                            color: '#8B4513'
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    series: [{
+                        type: 'pie',
+                        radius: '70%',
+                        data: [
+                            { value: 18, name: 'طبيعي', itemStyle: { color: '#28A745' } },
+                            { value: 5, name: 'يحتاج متابعة', itemStyle: { color: '#FFC107' } },
+                            { value: 2, name: 'يحتاج تدخل', itemStyle: { color: '#DC3545' } }
+                        ],
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }]
+                };
+                
+                chart.setOption(option);
+            }
+        }
+        
+        function initializeInstitutionChart() {
+            const chartElement = document.getElementById('institution-chart');
+            if (chartElement && typeof echarts !== 'undefined') {
+                const chart = echarts.init(chartElement);
+                
+                const option = {
+                    title: {
+                        text: 'النشاط الشهري',
+                        textStyle: {
+                            fontSize: 14,
+                            color: '#8B4513'
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو']
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: [12, 15, 18, 22, 25, 28],
+                        type: 'line',
+                        smooth: true,
+                        itemStyle: {
+                            color: '#C41E3A'
+                        },
+                        areaStyle: {
+                            color: 'rgba(196, 30, 58, 0.1)'
+                        }
+                    }]
+                };
+                
+                chart.setOption(option);
+            }
+        }
+        
+        // Interactive functions
+        function openTool(toolType) {
+            showNotification(`فتح أداة ${toolType}...`, 'info');
+            // Here you would implement the actual tool opening logic
+        }
+        
+        function goToSmartTools(toolType) {
+            window.location.href = `smart-tools.html?tool=${toolType}`;
+        }
+        
+        function createQuestionnaire() {
+            showNotification('جاري فتح منشئ الاستبيانات...', 'info');
+        }
+        
+        function addNewCase() {
+            showNotification('جاري فتح نموذج إضافة حالة...', 'info');
+        }
+        
+        function generateReport() {
+            showNotification('جاري إنشاء التقرير...', 'info');
+        }
+        
+        function inviteMember() {
+            showNotification('جاري فتح نموذج دعوة عضو...', 'info');
+        }
+        
+        function sendNotification() {
+            showNotification('جاري فتح نموذج إرسال إشعار...', 'info');
+        }
+        
+        function createResearchRequest() {
+            showNotification('جاري فتح نموذج طلب بحث...', 'info');
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            anime({
+                targets: notification,
+                translateX: [-300, 0],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+            
+            // Remove after delay
+            setTimeout(() => {
+                anime({
+                    targets: notification,
+                    translateX: [0, -300],
+                    opacity: [1, 0],
+                    duration: 300,
+                    easing: 'easeInQuad',
+                    complete: () => notification.remove()
+                });
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

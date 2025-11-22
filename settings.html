@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الإعدادات والخصوصية - DYS-CONNECT</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-red': '#C41E3A',
+                        'secondary-red': '#E85A4F',
+                        'accent-orange': '#F28B30',
+                        'warm-beige': '#F5F1E8',
+                        'deep-brown': '#8B4513',
+                        'soft-cream': '#FDF6E3',
+                        'muted-gold': '#D4AF37',
+                        'gentle-gray': '#6C757D'
+                    },
+                    fontFamily: {
+                        'cairo': ['Cairo', 'sans-serif'],
+                        'amiri': ['Amiri', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Amiri', serif;
+            background-color: #F5F1E8;
+        }
+        
+        .settings-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid rgba(196, 30, 58, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .settings-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #A01729 0%, #D64541 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #DC3545 0%, #C82333 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #C82333 0%, #B21E2F 100%);
+            transform: translateY(-2px);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+        
+        .input-focus:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.15);
+        }
+        
+        .sidebar-nav {
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-nav.active {
+            background-color: rgba(196, 30, 58, 0.1);
+            border-right: 4px solid #C41E3A;
+            color: #C41E3A;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 2rem;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 100%;
+            animation: modalIn 0.3s ease-out;
+        }
+        
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+        }
+        
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 35;
+        }
+        
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-warm-beige">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-sm shadow-lg fixed w-full top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-primary-red font-cairo">DYS-CONNECT</a>
+                </div>
+                
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="dashboard.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">لوحة التحكم</a>
+                        <a href="map.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الخريطة التفاعلية</a>
+                        <a href="library.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">المكتبة العلمية</a>
+                        <a href="messages.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الرسائل</a>
+                    </div>
+                </div>
+                
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-deep-brown hover:text-primary-red">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="mobile-menu fixed right-0 top-16 h-full w-64 bg-white shadow-lg md:hidden">
+        <div class="p-4 space-y-2">
+            <a href="dashboard.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                </svg>
+                <span class="font-medium">لوحة التحكم</span>
+            </a>
+            
+            <a href="map.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                </svg>
+                <span class="font-medium">الخريطة التفاعلية</span>
+            </a>
+            
+            <a href="library.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span class="font-medium">المكتبة العلمية</span>
+            </a>
+            
+            <a href="messages.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <span class="font-medium">الرسائل</span>
+            </a>
+            
+            <a href="settings.html" class="flex items-center px-4 py-3 text-primary-red bg-soft-cream rounded-lg transition-colors border-r-4 border-primary-red">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                </svg>
+                <span class="font-medium">الإعدادات</span>
+            </a>
+            
+            <hr class="my-4">
+            
+            <a href="index.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12a9 9 0 109 9m.05-10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="font-medium">الرئيسية</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="pt-16 min-h-screen">
+        <!-- Header -->
+        <div class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="text-center">
+                    <h1 class="text-3xl font-bold text-deep-brown font-cairo mb-2">الإعدادات والخصوصية</h1>
+                    <p class="text-gentle-gray font-amiri">إدارة حسابك وتحكم في خصوصيتك وإعداداتك الشخصية</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Settings Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="settings-card p-6 rounded-2xl shadow-lg">
+                        <div class="text-center mb-6">
+                            <div class="w-20 h-20 bg-primary-red rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
+                                <span id="user-avatar">أ</span>
+                            </div>
+                            <h3 id="user-name" class="text-lg font-bold text-deep-brown font-cairo">أحمد محمد</h3>
+                            <p id="user-role" class="text-sm text-gentle-gray font-amiri">معلم لغة عربية</p>
+                        </div>
+                        
+                        <nav class="space-y-2">
+                            <a href="#" class="sidebar-nav active flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span class="font-medium">الملف الشخصي</span>
+                            </a>
+                            
+                            <a href="#" class="sidebar-nav flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <span class="font-medium">الأمان والخصوصية</span>
+                            </a>
+                            
+                            <a href="#" class="sidebar-nav flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span class="font-medium">الإعدادات العامة</span>
+                            </a>
+                            
+                            <a href="#" class="sidebar-nav flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span class="font-medium">الاشتراك والفواتير</span>
+                            </a>
+                            
+                            <a href="#" class="sidebar-nav flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span class="font-medium">تسجيل الخروج</span>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+                
+                <!-- Settings Content -->
+                <div class="lg:col-span-3">
+                    <!-- Profile Settings -->
+                    <div id="profile-settings" class="settings-content">
+                        <div class="settings-card p-6 rounded-2xl shadow-lg mb-6">
+                            <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">الملف الشخصي</h2>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">الاسم الكامل</label>
+                                    <input type="text" id="full-name" value="أحمد محمد" 
+                                           class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">البريد الإلكتروني</label>
+                                    <input type="email" id="email" value="ahmed@example.com" 
+                                           class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">رقم الهاتف</label>
+                                    <input type="tel" id="phone" value="+213 555 123 456" 
+                                           class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">الدور</label>
+                                    <select id="role" class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                        <option value="teacher" selected>معلم</option>
+                                        <option value="mother">أم</option>
+                                        <option value="specialist">مختص</option>
+                                        <option value="institution">مؤسسة</option>
+                                        <option value="researcher">باحث</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">نبذة عني</label>
+                                    <textarea id="bio" rows="4" 
+                                              class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent"
+                                              placeholder="اكتب نبذة عنك...">معلم لغة عربية لدي خبرة 8 سنوات في مجال التعليم، أهتم بتعليم الأطفال ذوي الاحتياجات الخاصة.</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-end mt-6">
+                                <button onclick="saveProfile()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium">
+                                    حفظ التغييرات
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Profile Picture -->
+                        <div class="settings-card p-6 rounded-2xl shadow-lg">
+                            <h3 class="text-xl font-bold text-deep-brown font-cairo mb-4">الصورة الشخصية</h3>
+                            
+                            <div class="flex items-center space-x-6">
+                                <div class="w-24 h-24 bg-primary-red rounded-full flex items-center justify-center text-white text-4xl font-bold">
+                                    أ
+                                </div>
+                                <div>
+                                    <button onclick="changePhoto()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm mb-2">
+                                        تغيير الصورة
+                                    </button>
+                                    <p class="text-sm text-gentle-gray font-amiri">الصيغ المسموحة: JPG, PNG. الحجم الأقصى: 2MB</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Settings -->
+                    <div id="security-settings" class="settings-content hidden">
+                        <div class="settings-card p-6 rounded-2xl shadow-lg mb-6">
+                            <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">الأمان والخصوصية</h2>
+                            
+                            <!-- Change Password -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-bold text-deep-brown font-cairo mb-4">تغيير كلمة المرور</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">كلمة المرور الحالية</label>
+                                        <input type="password" id="current-password" 
+                                               class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                    </div>
+                                    <div></div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">كلمة المرور الجديدة</label>
+                                        <input type="password" id="new-password" 
+                                               class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">تأكيد كلمة المرور</label>
+                                        <input type="password" id="confirm-password" 
+                                               class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                    </div>
+                                </div>
+                                <div class="flex justify-end mt-4">
+                                    <button onclick="changePassword()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium">
+                                        تغيير كلمة المرور
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Two-Factor Authentication -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-bold text-deep-brown font-cairo mb-4">المصادقة الثنائية</h3>
+                                <div class="flex items-center justify-between p-4 bg-soft-cream rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-deep-brown font-cairo">تفعيل المصادقة الثنائية</h4>
+                                        <p class="text-sm text-gentle-gray font-amiri">أضف طبقة إضافية من الأمان لحسابك</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="two-factor">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Login Sessions -->
+                            <div>
+                                <h3 class="text-lg font-bold text-deep-brown font-cairo mb-4">جلسات تسجيل الدخول</h3>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-4 bg-soft-cream rounded-lg">
+                                        <div>
+                                            <h4 class="font-bold text-deep-brown font-cairo">الجلسة الحالية</h4>
+                                            <p class="text-sm text-gentle-gray font-amiri">الجزائر، Chrome - منذ 5 دقائق</p>
+                                        </div>
+                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">نشط</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between p-4 bg-soft-cream rounded-lg">
+                                        <div>
+                                            <h4 class="font-bold text-deep-brown font-cairo">جلسة سابقة</h4>
+                                            <p class="text-sm text-gentle-gray font-amiri">الجزائر، Firefox - منذ 3 ساعات</p>
+                                        </div>
+                                        <button onclick="revokeSession()" class="text-sm text-primary-red hover:underline">إلغاء</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Privacy Settings -->
+                        <div class="settings-card p-6 rounded-2xl shadow-lg">
+                            <h3 class="text-xl font-bold text-deep-brown font-cairo mb-4">إعدادات الخصوصية</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-soft-cream rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-deep-brown font-cairo">الظهور على الخريطة</h4>
+                                        <p class="text-sm text-gentle-gray font-amiri">السماح للمستخدمين الآخرين برؤيتك على الخريطة</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="map-visibility" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-4 bg-soft-cream rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-deep-brown font-cairo">إشعارات الرسائل</h4>
+                                        <p class="text-sm text-gentle-gray font-amiri">تلقي إشعارات عند وصول رسائل جديدة</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="message-notifications" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-4 bg-soft-cream rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-deep-brown font-cairo">إشعارات التحديثات</h4>
+                                        <p class="text-sm text-gentle-gray font-amiri">تلقي إشعارات حول تحديثات المنصة</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="update-notifications" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-4 bg-soft-cream rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-deep-brown font-cairo">مشاركة البيانات مع الباحثين</h4>
+                                        <p class="text-sm text-gentle-gray font-amiri">السماح باستخدام بياناتك في الأبحاث العلمية (مجهولة)</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="research-sharing">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- General Settings -->
+                    <div id="general-settings" class="settings-content hidden">
+                        <div class="settings-card p-6 rounded-2xl shadow-lg mb-6">
+                            <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">الإعدادات العامة</h2>
+                            
+                            <div class="space-y-6">
+                                <!-- Language -->
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">اللغة</label>
+                                    <select id="language" class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                        <option value="ar" selected>العربية</option>
+                                        <option value="fr">الفرنسية</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Time Zone -->
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">المنطقة الزمنية</label>
+                                    <select id="timezone" class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                        <option value="GMT+1" selected>توقيت الجزائر (GMT+1)</option>
+                                        <option value="GMT">توقيت غرينتش (GMT)</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Date Format -->
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">صيغة التاريخ</label>
+                                    <select id="date-format" class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                        <option value="DD/MM/YYYY" selected>يوم/شهر/سنة</option>
+                                        <option value="MM/DD/YYYY">شهر/يوم/سنة</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Default Page -->
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">الصفحة الافتراضية</label>
+                                    <select id="default-page" class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                        <option value="dashboard" selected>لوحة التحكم</option>
+                                        <option value="map">الخريطة التفاعلية</option>
+                                        <option value="messages">الرسائل</option>
+                                        <option value="library">المكتبة العلمية</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-end mt-6">
+                                <button onclick="saveGeneralSettings()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium">
+                                    حفظ التغييرات
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Notification Settings -->
+                        <div class="settings-card p-6 rounded-2xl shadow-lg">
+                            <h3 class="text-xl font-bold text-deep-brown font-cairo mb-4">إعدادات الإشعارات</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-soft-cream rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-deep-brown font-cairo">البريد الإلكتروني</h4>
+                                        <p class="text-sm text-gentle-gray font-amiri">تلقي إشعارات عبر البريد الإلكتروني</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="email-notifications" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-4 bg-soft-cream rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-deep-brown font-cairo">الرسائل النصية</h4>
+                                        <p class="text-sm text-gentle-gray font-amiri">تلقي إشعارات عبر الرسائل النصية</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="sms-notifications">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-4 bg-soft-cream rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-deep-brown font-cairo">التذكيرات</h4>
+                                        <p class="text-sm text-gentle-gray font-amiri">تلقي تذكيرات بالجلسات والمواعيد</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="reminders" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Subscription Settings -->
+                    <div id="subscription-settings" class="settings-content hidden">
+                        <div class="settings-card p-6 rounded-2xl shadow-lg mb-6">
+                            <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">الاشتراك والفواتير</h2>
+                            
+                            <!-- Current Plan -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-bold text-deep-brown font-cairo mb-4">الباقة الحالية</h3>
+                            <div class="p-4 border-2 border-primary-red rounded-lg bg-soft-cream">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-lg font-bold text-primary-red font-cairo">الباقة الذهبية</h4>
+                                        <p class="text-sm text-gentle-gray font-amiri">15,000 دج سنوياً</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-deep-brown text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <p class="text-sm font-amiri">© 2025 DYS-CONNECT. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Setup mobile menu
+        document.addEventListener('DOMContentLoaded', function() {
+            setupMobileMenu();
+        });
+        
+        function setupMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('active');
+                });
+                
+                // Close menu when clicking on a link
+                mobileMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenu.classList.remove('active');
+                    });
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                        mobileMenu.classList.remove('active');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h4 class="text-lg font-bold text-primary-red font-cairo">الباقة الذهبية</h4>
+                                            <p class="text-sm text-gentle-gray font-amiri">15,000 دج سنوياً</p>
+                                            <p class=

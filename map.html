@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الخريطة التفاعلية - DYS-CONNECT</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-red': '#C41E3A',
+                        'secondary-red': '#E85A4F',
+                        'accent-orange': '#F28B30',
+                        'warm-beige': '#F5F1E8',
+                        'deep-brown': '#8B4513',
+                        'soft-cream': '#FDF6E3',
+                        'muted-gold': '#D4AF37',
+                        'gentle-gray': '#6C757D'
+                    },
+                    fontFamily: {
+                        'cairo': ['Cairo', 'sans-serif'],
+                        'amiri': ['Amiri', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Amiri', serif;
+            background-color: #F5F1E8;
+        }
+        
+        .map-container {
+            height: calc(100vh - 200px);
+            min-height: 500px;
+        }
+        
+        .filter-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid rgba(196, 30, 58, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .filter-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #A01729 0%, #D64541 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.3);
+        }
+        
+        .role-filter {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .role-filter:hover {
+            transform: scale(1.05);
+        }
+        
+        .role-filter.active {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(196, 30, 58, 0.2);
+        }
+        
+        .search-input {
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.15);
+        }
+        
+        .user-popup {
+            animation: popupIn 0.3s ease-out;
+        }
+        
+        @keyframes popupIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .custom-marker {
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            animation: markerPulse 2s infinite;
+        }
+        
+        @keyframes markerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid rgba(196, 30, 58, 0.1);
+        }
+        
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .leaflet-popup-content {
+            margin: 16px;
+            font-family: 'Amiri', serif;
+        }
+        
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 35;
+        }
+        
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-warm-beige">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-sm shadow-lg fixed w-full top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-primary-red font-cairo">DYS-CONNECT</a>
+                </div>
+                
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="dashboard.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">لوحة التحكم</a>
+                        <a href="library.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">المكتبة العلمية</a>
+                        <a href="messages.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الرسائل</a>
+                        <a href="settings.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الإعدادات</a>
+                    </div>
+                </div>
+                
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-deep-brown hover:text-primary-red">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="mobile-menu fixed right-0 top-16 h-full w-64 bg-white shadow-lg md:hidden">
+        <div class="p-4 space-y-2">
+            <a href="dashboard.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                </svg>
+                <span class="font-medium">لوحة التحكم</span>
+            </a>
+            
+            <a href="map.html" class="flex items-center px-4 py-3 text-primary-red bg-soft-cream rounded-lg transition-colors border-r-4 border-primary-red">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                </svg>
+                <span class="font-medium">الخريطة التفاعلية</span>
+            </a>
+            
+            <a href="library.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span class="font-medium">المكتبة العلمية</span>
+            </a>
+            
+            <a href="messages.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <span class="font-medium">الرسائل</span>
+            </a>
+            
+            <a href="settings.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                </svg>
+                <span class="font-medium">الإعدادات</span>
+            </a>
+            
+            <hr class="my-4">
+            
+            <a href="index.html" class="flex items-center px-4 py-3 text-deep-brown hover:text-primary-red hover:bg-soft-cream rounded-lg transition-colors">
+                <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12a9 9 0 109 9m.05-10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="font-medium">الرئيسية</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="pt-16 min-h-screen">
+        <!-- Header -->
+        <div class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="text-center">
+                    <h1 class="text-3xl font-bold text-deep-brown font-cairo mb-2">الخريطة التفاعلية</h1>
+                    <p class="text-gentle-gray font-amiri">اكتف الفاعلين التربويين في منطقتك وتواصل معهم بسهولة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Search -->
+                <div class="lg:col-span-2">
+                    <div class="filter-card p-4 rounded-2xl">
+                        <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">البحث عن فاعل تربوي</label>
+                        <input type="text" id="search-input" placeholder="ابحث بالاسم أو التخصص..."
+                               class="search-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                    </div>
+                </div>
+                
+                <!-- Location Filter -->
+                <div class="filter-card p-4 rounded-2xl">
+                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">الولاية</label>
+                    <select id="state-filter" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                        <option value="">جميع الولايات</option>
+                        <option value="الجزائر">الجزائر</option>
+                        <option value="البويرة">البويرة</option>
+                        <option value="تيزي وزو">تيزي وزو</option>
+                        <option value="بجاية">بجاية</option>
+                        <option value="سطيف">سطيف</option>
+                        <option value="قسنطينة">قسنطينة</option>
+                        <option value="وهران">وهران</option>
+                        <option value="عنابة">عنابة</option>
+                    </select>
+                </div>
+                
+                <!-- Distance Filter -->
+                <div class="filter-card p-4 rounded-2xl">
+                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">المسافة</label>
+                    <select id="distance-filter" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                        <option value="">أي مسافة</option>
+                        <option value="5">خلال 5 كم</option>
+                        <option value="10">خلال 10 كم</option>
+                        <option value="25">خلال 25 كم</option>
+                        <option value="50">خلال 50 كم</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Role Filters -->
+            <div class="mt-6">
+                <h3 class="text-lg font-bold text-deep-brown font-cairo mb-4">تصنيف حسب الدور</h3>
+                <div class="flex flex-wrap gap-4">
+                    <div class="role-filter filter-card p-4 rounded-2xl text-center active" data-role="all">
+                        <div class="text-3xl mb-2">👥</div>
+                        <div class="text-sm font-medium text-deep-brown font-cairo">الكل</div>
+                        <div class="text-xs text-gentle-gray font-amiri">45 فاعل</div>
+                    </div>
+                    
+                    <div class="role-filter filter-card p-4 rounded-2xl text-center" data-role="mother">
+                        <div class="text-3xl mb-2">👩‍👦</div>
+                        <div class="text-sm font-medium text-deep-brown font-cairo">أم</div>
+                        <div class="text-xs text-gentle-gray font-amiri">18 فاعل</div>
+                    </div>
+                    
+                    <div class="role-filter filter-card p-4 rounded-2xl text-center" data-role="teacher">
+                        <div class="text-3xl mb-2">🧑‍🏫</div>
+                        <div class="text-sm font-medium text-deep-brown font-cairo">معلم</div>
+                        <div class="text-xs text-gentle-gray font-amiri">12 فاعل</div>
+                    </div>
+                    
+                    <div class="role-filter filter-card p-4 rounded-2xl text-center" data-role="specialist">
+                        <div class="text-3xl mb-2">🧠</div>
+                        <div class="text-sm font-medium text-deep-brown font-cairo">مختص</div>
+                        <div class="text-xs text-gentle-gray font-amiri">8 فاعلين</div>
+                    </div>
+                    
+                    <div class="role-filter filter-card p-4 rounded-2xl text-center" data-role="institution">
+                        <div class="text-3xl mb-2">🏫</div>
+                        <div class="text-sm font-medium text-deep-brown font-cairo">مؤسسة</div>
+                        <div class="text-xs text-gentle-gray font-amiri">5 فاعلين</div>
+                    </div>
+                    
+                    <div class="role-filter filter-card p-4 rounded-2xl text-center" data-role="researcher">
+                        <div class="text-3xl mb-2">🎓</div>
+                        <div class="text-sm font-medium text-deep-brown font-cairo">باحث</div>
+                        <div class="text-xs text-gentle-gray font-amiri">2 فاعلين</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map and Statistics -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Map -->
+                <div class="lg:col-span-3">
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-xl font-bold text-deep-brown font-cairo">الخريطة التفاعلية</h2>
+                                <div class="flex items-center space-x-2">
+                                    <button id="locate-btn" class="text-primary-red hover:text-secondary-red text-sm">
+                                        📍 تحديد موقعي
+                                    </button>
+                                    <button id="reset-btn" class="text-gentle-gray hover:text-deep-brown text-sm">
+                                        🔄 إعادة تعيين
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="map" class="map-container"></div>
+                    </div>
+                </div>
+                
+                <!-- Statistics and User Details -->
+                <div class="space-y-6">
+                    <!-- Statistics -->
+                    <div class="stats-card p-4 rounded-2xl">
+                        <h3 class="text-lg font-bold text-deep-brown font-cairo mb-4">إحصائيات الموقع</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gentle-gray font-amiri">إجمالي الفاعلين:</span>
+                                <span id="total-users" class="text-sm font-bold text-primary-red font-cairo">45</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gentle-gray font-amiri">ضمن نطاق 10 كم:</span>
+                                <span id="nearby-users" class="text-sm font-bold text-accent-orange font-cairo">12</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gentle-gray font-amiri">متصل الآن:</span>
+                                <span id="online-users" class="text-sm font-bold text-muted-gold font-cairo">8</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Selected User Details -->
+                    <div id="user-details" class="stats-card p-4 rounded-2xl hidden">
+                        <div class="text-center mb-4">
+                            <div id="selected-user-icon" class="text-4xl mb-2"></div>
+                            <h3 id="selected-user-name" class="text-lg font-bold text-deep-brown font-cairo"></h3>
+                            <p id="selected-user-role" class="text-sm text-gentle-gray font-amiri"></p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gentle-gray font-amiri">التخصص:</span>
+                                <span id="selected-user-specialty" class="text-sm font-medium text-deep-brown font-amiri"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gentle-gray font-amiri">المسافة:</span>
+                                <span id="selected-user-distance" class="text-sm font-medium text-deep-brown font-amiri"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gentle-gray font-amiri">التقييم:</span>
+                                <div class="flex items-center">
+                                    <span id="selected-user-rating" class="text-sm font-medium text-deep-brown font-amiri"></span>
+                                    <span class="text-yellow-500 mr-1">⭐</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 space-y-2">
+                            <button onclick="requestContact()" class="w-full btn-primary text-white py-2 rounded-lg text-sm">
+                                طلب تواصل
+                            </button>
+                            <button onclick="viewProfile()" class="w-full border border-primary-red text-primary-red hover:bg-primary-red hover:text-white py-2 rounded-lg text-sm transition-colors">
+                                عرض الملف
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="stats-card p-4 rounded-2xl">
+                        <h3 class="text-lg font-bold text-deep-brown font-cairo mb-4">إجراءات سريعة</h3>
+                        <div class="space-y-2">
+                            <button onclick="addToFavorites()" class="w-full text-right text-sm text-gentle-gray hover:text-primary-red font-amiri p-2 rounded-lg hover:bg-soft-cream transition-colors">
+                                ❤️ إضافة إلى المفضلة
+                            </button>
+                            <button onclick="shareLocation()" class="w-full text-right text-sm text-gentle-gray hover:text-primary-red font-amiri p-2 rounded-lg hover:bg-soft-cream transition-colors">
+                                📤 مشاركة الموقع
+                            </button>
+                            <button onclick="reportUser()" class="w-full text-right text-sm text-gentle-gray hover:text-primary-red font-amiri p-2 rounded-lg hover:bg-soft-cream transition-colors">
+                                ⚠️ الإبلاغ عن مستخدم
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-deep-brown text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="text-3xl font-bold text-muted-gold font-cairo mb-4">DYS-CONNECT</div>
+                <p class="text-lg font-amiri mb-6">منصة جزائرية للتكفل الذكي والمبكر بالأطفال</p>
+                <div class="border-t border-gray-600 pt-6">
+                    <p class="text-sm font-amiri">© 2025 DYS-CONNECT. جميع الحقوق محفوظة.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Map functionality
+        let map;
+        let markers = [];
+        let userLocation = null;
+        let selectedRole = 'all';
+        
+        // Sample data for users
+        const usersData = [
+            { id: 1, name: 'فاطمة الزهراء', role: 'mother', specialty: 'أم لطفل يحتاج دعم', lat: 36.7783, lng: 3.0588, rating: 4.8, distance: 2.1 },
+            { id: 2, name: 'أحمد محمد', role: 'teacher', specialty: 'معلم لغة عربية', lat: 36.7765, lng: 3.0522, rating: 4.9, distance: 1.8 },
+            { id: 3, name: 'د. سعيدة', role: 'specialist', specialty: 'أخصائية نفسية', lat: 36.7821, lng: 3.0612, rating: 4.7, distance: 3.2 },
+            { id: 4, name: 'مدرسة ابن خلدون', role: 'institution', specialty: 'مؤسسة تعليمية', lat: 36.7745, lng: 3.0555, rating: 4.6, distance: 2.5 },
+            { id: 5, name: 'د. يوسف', role: 'researcher', specialty: 'باحث في علم النفس', lat: 36.7801, lng: 3.0599, rating: 4.8, distance: 1.9 },
+            { id: 6, name: 'أمينة بن علي', role: 'mother', specialty: 'أم لطفلين', lat: 36.7756, lng: 3.0577, rating: 4.5, distance: 2.3 },
+            { id: 7, name: 'محمد العربي', role: 'teacher', specialty: 'معلم رياضيات', lat: 36.7798, lng: 3.0544, rating: 4.7, distance: 1.7 },
+            { id: 8, name: 'د. خديجة', role: 'specialist', specialty: 'أخصائية أرطوفوني', lat: 36.7812, lng: 3.0601, rating: 4.9, distance: 2.8 },
+            { id: 9, name: 'روضة الأمل', role: 'institution', specialty: 'روضة أطفال', lat: 36.7734, lng: 3.0567, rating: 4.4, distance: 3.1 },
+            { id: 10, name: 'د. علي', role: 'researcher', specialty: 'باحث في التربية الخاصة', lat: 36.7777, lng: 3.0589, rating: 4.6, distance: 2.0 }
+        ];
+        
+        // Initialize map
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMap();
+            setupEventListeners();
+            setupMobileMenu();
+            loadUsersOnMap();
+            updateStatistics();
+        });
+        
+        function setupMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('active');
+                });
+                
+                // Close menu when clicking on a link
+                mobileMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenu.classList.remove('active');
+                    });
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                        mobileMenu.classList.remove('active');
+                    }
+                });
+            }
+        }
+        
+        function initializeMap() {
+            // Initialize map centered on Algeria
+            map = L.map('map').setView([36.7783, 3.0588], 12);
+            
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(map);
+            
+            // Add custom controls
+            map.zoomControl.setPosition('bottomright');
+        }
+        
+        function setupEventListeners() {
+            // Role filters
+            document.querySelectorAll('.role-filter').forEach(filter => {
+                filter.addEventListener('click', function() {
+                    // Update active state
+                    document.querySelectorAll('.role-filter').forEach(f => f.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update selected role
+                    selectedRole = this.getAttribute('data-role');
+                    
+                    // Filter markers
+                    filterMarkers();
+                    updateStatistics();
+                });
+            });
+            
+            // Search input
+            document.getElementById('search-input').addEventListener('input', function() {
+                filterMarkers();
+            });
+            
+            // State filter
+            document.getElementById('state-filter').addEventListener('change', function() {
+                filterMarkers();
+            });
+            
+            // Distance filter
+            document.getElementById('distance-filter').addEventListener('change', function() {
+                filterMarkers();
+            });
+            
+            // Locate button
+            document.getElementById('locate-btn').addEventListener('click', function() {
+                locateUser();
+            });
+            
+            // Reset button
+            document.getElementById('reset-btn').addEventListener('click', function() {
+                resetFilters();
+            });
+        }
+        
+        function loadUsersOnMap() {
+            usersData.forEach(user => {
+                const marker = createUserMarker(user);
+                markers.push({ marker, user });
+            });
+        }
+        
+        function createUserMarker(user) {
+            const color = getRoleColor(user.role);
+            const icon = L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            const marker = L.marker([user.lat, user.lng], { icon })
+                .addTo(map)
+                .bindPopup(createPopupContent(user));
+            
+            marker.on('click', function() {
+                showUserDetails(user);
+            });
+            
+            return marker;
+        }
+        
+        function createPopupContent(user) {
+            const roleIcons = {
+                mother: '👩‍👦',
+                teacher: '🧑‍🏫',
+                specialist: '🧠',
+                institution: '🏫',
+                researcher: '🎓'
+            };
+            
+            return `
+                <div class="user-popup text-right">
+                    <div class="text-center mb-3">
+                        <div class="text-3xl mb-1">${roleIcons[user.role]}</div>
+                        <h3 class="font-bold text-deep-brown font-cairo">${user.name}</h3>
+                        <p class="text-sm text-gentle-gray font-amiri">${user.specialty}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-xs text-gentle-gray font-amiri">المسافة:</span>
+                            <span class="text-xs text-deep-brown font-amiri">${user.distance} كم</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-xs text-gentle-gray font-amiri">التقييم:</span>
+                            <span class="text-xs text-deep-brown font-amiri">${user.rating} ⭐</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 space-y-2">
+                        <button onclick="requestContact(${user.id})" class="w-full btn-primary text-white py-2 rounded-lg text-xs">
+                            طلب تواصل
+                        </button>
+                        <button onclick="viewProfile(${user.id})" class="w-full border border-primary-red text-primary-red hover:bg-primary-red hover:text-white py-2 rounded-lg text-xs transition-colors">
+                            عرض الملف
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getRoleColor(role) {
+            const colors = {
+                mother: '#C41E3A',
+                teacher: '#E85A4F',
+                specialist: '#F28B30',
+                institution: '#D4AF37',
+                researcher: '#6C757D'
+            };
+            return colors[role] || '#C41E3A';
+        }
+        
+        function filterMarkers() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const selectedState = document.getElementById('state-filter').value;
+            const selectedDistance = document.getElementById('distance-filter').value;
+            
+            markers.forEach(({ marker, user }) => {
+                let show = true;
+                
+                // Filter by role
+                if (selectedRole !== 'all' && user.role !== selectedRole) {
+                    show = false;
+                }
+                
+                // Filter by search term
+                if (searchTerm && !user.name.toLowerCase().includes(searchTerm) && 
+                    !user.specialty.toLowerCase().includes(searchTerm)) {
+                    show = false;
+                }
+                
+                // Filter by distance
+                if (selectedDistance && user.distance > parseInt(selectedDistance)) {
+                    show = false;
+                }
+                
+                if (show) {
+                    marker.addTo(map);
+                } else {
+                    map.removeLayer(marker);
+                }
+            });
+            
+            updateStatistics();
+        }
+        
+        function updateStatistics() {
+            const visibleMarkers = markers.filter(({ marker }) => map.hasLayer(marker));
+            const visibleUsers = visibleMarkers.map(({ user }) => user);
+            
+            document.getElementById('total-users').textContent = visibleUsers.length;
+            document.getElementById('nearby-users').textContent = visibleUsers.filter(u => u.distance <= 10).length;
+            document.getElementById('online-users').textContent = Math.floor(visibleUsers.length * 0.3); // Simulate online users
+        }
+        
+        function showUserDetails(user) {
+            const userDetails = document.getElementById('user-details');
+            const roleIcons = {
+                mother: '👩‍👦',
+                teacher: '🧑‍🏫',
+                specialist: '🧠',
+                institution: '🏫',
+                researcher: '🎓'
+            };
+            
+            document.getElementById('selected-user-icon').textContent = roleIcons[user.role];
+            document.getElementById('selected-user-name').textContent = user.name;
+            document.getElementById('selected-user-role').textContent = getRoleName(user.role);
+            document.getElementById('selected-user-specialty').textContent = user.specialty;
+            document.getElementById('selected-user-distance').textContent = user.distance + ' كم';
+            document.getElementById('selected-user-rating').textContent = user.rating;
+            
+            userDetails.classList.remove('hidden');
+            
+            // Animate in
+            anime({
+                targets: userDetails,
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+        }
+        
+        function getRoleName(role) {
+            const roleNames = {
+                mother: 'أم',
+                teacher: 'معلم',
+                specialist: 'مختص',
+                institution: 'مؤسسة',
+                researcher: 'باحث'
+            };
+            return roleNames[role] || role;
+        }
+        
+        function locateUser() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    userLocation = { lat, lng };
+                    
+                    // Add user location marker
+                    const userIcon = L.divIcon({
+                        className: 'user-location-marker',
+                        html: '<div style="background-color: #007BFF; width: 15px; height: 15px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>',
+                        iconSize: [15, 15],
+                        iconAnchor: [7.5, 7.5]
+                    });
+                    
+                    L.marker([lat, lng], { icon: userIcon })
+                        .addTo(map)
+                        .bindPopup('موقعك الحالي')
+                        .openPopup();
+                    
+                    // Center map on user location
+                    map.setView([lat, lng], 13);
+                    
+                    showNotification('تم تحديد موقعك بنجاح', 'success');
+                }, function() {
+                    showNotification('تعذر الوصول إلى الموقع', 'error');
+                });
+            } else {
+                showNotification('المتصفح لا يدعم تحديد الموقع', 'error');
+            }
+        }
+        
+        function resetFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('state-filter').value = '';
+            document.getElementById('distance-filter').value = '';
+            
+            document.querySelectorAll('.role-filter').forEach(f => f.classList.remove('active'));
+            document.querySelector('.role-filter[data-role="all"]').classList.add('active');
+            
+            selectedRole = 'all';
+            filterMarkers();
+            
+            // Hide user details
+            document.getElementById('user-details').classList.add('hidden');
+            
+            // Reset map view
+            map.setView([36.7783, 3.0588], 12);
+            
+            showNotification('تم إعادة تعيين الفلاتر', 'info');
+        }
+        
+        // Interactive functions
+        function requestContact(userId = null) {
+            const user = userId ? usersData.find(u => u.id === userId) : null;
+            const message = user ? `تم إرسال طلب تواصل إلى ${user.name}` : 'تم إرسال طلب التواصل';
+            showNotification(message, 'success');
+        }
+        
+        function viewProfile(userId = null) {
+            const user = userId ? usersData.find(u => u.id === userId) : null;
+            const message = user ? `جاري فتح ملف ${user.name}` : 'جاري فتح الملف الشخصي';
+            showNotification(message, 'info');
+        }
+        
+        function addToFavorites() {
+            showNotification('تمت الإضافة إلى المفضلة', 'success');
+        }
+        
+        function shareLocation() {
+            showNotification('تم نسخ رابط الموقع للمشاركة', 'success');
+        }
+        
+        function reportUser() {
+            showNotification('تم إرسال البلاغ، شكراً لك', 'info');
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            anime({
+                targets: notification,
+                translateX: [-300, 0],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+            
+            // Remove after delay
+            setTimeout(() => {
+                anime({
+                    targets: notification,
+                    translateX: [0, -300],
+                    opacity: [1, 0],
+                    duration: 300,
+                    easing: 'easeInQuad',
+                    complete: () => notification.remove()
+                });
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

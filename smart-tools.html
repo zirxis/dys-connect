@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأدوات الذكية - DYS-CONNECT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&family=Sora:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2C3E50;
+            --secondary-color: #D4A574;
+            --background-color: #F8F6F3;
+            --mother-color: #87A96B;
+            --teacher-color: #E67E22;
+            --specialist-color: #3498DB;
+            --child-color: #9B59B6;
+            --institution-color: #34495E;
+            --researcher-color: #8E44AD;
+        }
+        
+        body {
+            font-family: 'Poppins', 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+        
+        .page-title {
+            font-family: 'Sora', 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .tool-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .tool-active {
+            background: linear-gradient(135deg, rgba(135, 169, 107, 0.1), rgba(212, 165, 116, 0.1));
+            border-color: var(--mother-color);
+        }
+        
+        .workspace {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,246,243,0.95));
+            backdrop-filter: blur(10px);
+        }
+        
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .mindmap-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .mindmap-node {
+            position: absolute;
+            background: white;
+            border: 2px solid var(--mother-color);
+            border-radius: 12px;
+            padding: 8px 16px;
+            cursor: move;
+            user-select: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .mindmap-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        
+        .mindmap-node.central {
+            background: var(--mother-color);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .mindmap-connection {
+            position: absolute;
+            height: 2px;
+            background: var(--mother-color);
+            transform-origin: left center;
+            opacity: 0.6;
+        }
+        
+        .writing-canvas {
+            border: 2px dashed #D1D5DB;
+            border-radius: 12px;
+            background: white;
+            cursor: crosshair;
+        }
+        
+        .writing-canvas.active {
+            border-color: var(--mother-color);
+            border-style: solid;
+        }
+        
+        .summary-output {
+            background: linear-gradient(135deg, #F0F9FF, #E0F2FE);
+            border: 1px solid #0EA5E9;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 200px;
+        }
+        
+        .exercise-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .exercise-card.correct {
+            border-color: #10B981;
+            background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+        }
+        
+        .exercise-card.incorrect {
+            border-color: #EF4444;
+            background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--mother-color), var(--secondary-color));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="text-2xl font-bold gradient-text">DYS-CONNECT</div>
+                </div>
+                <div class="hidden md:flex desktop-menu items-center space-x-8">
+                    <a href="index.html" class="nav-link text-gray-700 hover:text-gray-900">الرئيسية</a>
+                    <a href="mother-dashboard.html" class="nav-link text-gray-700 hover:text-gray-900">لوحة التحكم</a>
+                    <a href="#" class="nav-link text-blue-600 font-medium">الأدوات الذكية</a>
+                    <a href="interactive-map.html" class="nav-link text-gray-700 hover:text-gray-900">الخريطة</a>
+                    <a href="pricing.html" class="nav-link text-gray-700 hover:text-gray-900">الأسعار</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="showNotification('تم حفظ التقدم', 'success')" class="hidden md:block px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all">
+                        حفظ التقدم
+                    </button>
+                    <button class="mobile-menu-btn md:hidden" type="button">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu">
+            <div class="mobile-menu-content">
+                <a href="index.html" class="mobile-menu-link">الرئيسية</a>
+                <a href="mother-dashboard.html" class="mobile-menu-link">لوحة التحكم</a>
+                <a href="#" class="mobile-menu-link">الأدوات الذكية</a>
+                <a href="interactive-map.html" class="mobile-menu-link">الخريطة</a>
+                <a href="pricing.html" class="mobile-menu-link">الأسعار</a>
+                <div class="mobile-menu-buttons">
+                    <button onclick="showNotification('تم حفظ التقدم', 'success')" class="w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all">
+                        حفظ التقدم
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <section class="pt-24 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-8">
+                <h1 class="page-title mb-4">
+                    <span class="gradient-text">الأدوات الذكية</span>
+                </h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    أدوات متقدمة لدعم التعلم المنزلي وتعزيز الفهم والحفظ لدى الأطفال
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Navigation -->
+    <section class="pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button onclick="switchTool('summary')" id="summary-tab" class="tool-tab px-6 py-3 rounded-xl bg-white shadow-lg border-2 border-transparent hover:border-blue-500 transition-all">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        تلخيص الدروس
+                    </div>
+                </button>
+                
+                <button onclick="switchTool('mindmap')" id="mindmap-tab" class="tool-tab px-6 py-3 rounded-xl bg-white shadow-lg border-2 border-transparent hover:border-green-500 transition-all">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
+                        خرائط ذهنية
+                    </div>
+                </button>
+                
+                <button onclick="switchTool('exercises')" id="exercises-tab" class="tool-tab px-6 py-3 rounded-xl bg-white shadow-lg border-2 border-transparent hover:border-purple-500 transition-all">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        تمارين تفاعلية
+                    </div>
+                </button>
+                
+                <button onclick="switchTool('writing')" id="writing-tab" class="tool-tab px-6 py-3 rounded-xl bg-white shadow-lg border-2 border-transparent hover:border-orange-500 transition-all">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
+                        تدريب الكتابة
+                    </div>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tool Workspace -->
+    <section class="pb-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="workspace rounded-2xl p-8 shadow-xl">
+                
+                <!-- Summary Tool -->
+                <div id="summary-tool" class="tool-content">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900">أداة تلخيص الدروس</h2>
+                        <div class="flex items-center space-x-4">
+                            <button onclick="loadFromLibrary()" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                                من المكتبة
+                            </button>
+                            <button onclick="generateSummary()" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all">
+                                تلخيص
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">نص الدرس</label>
+                            <textarea id="lesson-input" class="w-full h-80 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="اكتب أو ألصق نص الدرس هنا..."></textarea>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span class="text-sm text-gray-500">عدد الكلمات: <span id="word-count">0</span></span>
+                                <div class="flex space-x-2">
+                                    <button onclick="clearInput()" class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 transition-colors">مسح</button>
+                                    <button onclick="loadSampleText()" class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 transition-colors">نموذج</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">الملخص</label>
+                            <div id="summary-output" class="summary-output">
+                                <div class="text-center text-gray-500 py-12">
+                                    <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <p>سيتم عرض الملخص هنا بعد النقر على زر التلخيص</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span class="text-sm text-gray-500">نسبة التقليص: <span id="reduction-rate">0%</span></span>
+                                <div class="flex space-x-2">
+                                    <button onclick="copySummary()" class="px-3 py-1 text-sm text-green-600 hover:text-green-800 transition-colors">نسخ</button>
+                                    <button onclick="saveSummary()" class="px-3 py-1 text-sm text-purple-600 hover:text-purple-800 transition-colors">حفظ</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mind Map Tool -->
+                <div id="mindmap-tool" class="tool-content hidden">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900">أداة الخرائط الذهنية</h2>
+                        <div class="flex items-center space-x-4">
+                            <button onclick="clearMindMap()" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                                مسح الخريطة
+                            </button>
+                            <button onclick="exportMindMap()" class="px-6 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all">
+                                تصدير
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid lg:grid-cols-4 gap-6">
+                        <div class="lg:col-span-1">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">العنوان الرئيسي</label>
+                                    <input type="text" id="mindmap-title" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="أدخل عنوان الخريطة..." value="النباتات">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">الأفكار الفرعية</label>
+                                    <textarea id="mindmap-branches" class="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none" placeholder="اكتب كل فكرة في سطر...
+أجزاء النبات
+أنواع النباتات
+حاجيات النباتات">أجزاء النبات
+أنواع النباتات
+حاجيات النباتات</textarea>
+                                </div>
+                                <button onclick="generateMindMap()" class="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all">
+                                    إنشاء الخريطة
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="lg:col-span-3">
+                            <div class="mindmap-container bg-white rounded-xl border-2 border-dashed border-gray-300 h-96 relative" id="mindmap-canvas">
+                                <div class="absolute inset-0 flex items-center justify-center text-gray-500">
+                                    <div class="text-center">
+                                        <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                        </svg>
+                                        <p>اضغط على "إنشاء الخريطة" لعرض الخريطة الذهنية</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Exercises Tool -->
+                <div id="exercises-tool" class="tool-content hidden">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900">تمارين تفاعلية</h2>
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-600">النتيجة:</span>
+                                <span id="exercise-score" class="text-lg font-bold text-purple-600">0/0</span>
+                            </div>
+                            <button onclick="generateNewExercises()" class="px-6 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all">
+                                تمارين جديدة
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" id="exercises-container">
+                        <!-- Exercises will be generated here -->
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">الإحصائيات</h3>
+                            <button onclick="resetStats()" class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 transition-colors">إعادة تعيين</button>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-green-600" id="correct-count">0</div>
+                                <div class="text-sm text-gray-600">إجابات صحيحة</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-red-600" id="incorrect-count">0</div>
+                                <div class="text-sm text-gray-600">إجابات خاطئة</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-blue-600" id="accuracy-rate">0%</div>
+                                <div class="text-sm text-gray-600">الدقة</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Writing Practice Tool -->
+                <div id="writing-tool" class="tool-content hidden">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-2xl font-bold text-gray-900">تدريب الكتابة</h2>
+                        <div class="flex items-center space-x-4">
+                            <select id="writing-level" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                <option value="beginner">مبتدئ</option>
+                                <option value="intermediate">متوسط</option>
+                                <option value="advanced">متقدم</option>
+                            </select>
+                            <button onclick="clearCanvas()" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                                مسح
+                            </button>
+                            <button onclick="evaluateWriting()" class="px-6 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all">
+                                تقييم
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid lg:grid-cols-3 gap-8">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">النموذج</h3>
+                            <div class="bg-gray-50 rounded-xl p-6 h-64 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="text-6xl text-gray-700 mb-2" id="writing-template">أ</div>
+                                    <p class="text-gray-600">انسخ هذا الحرف</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">مساحة الكتابة</h3>
+                            <div class="writing-canvas h-64" id="writing-canvas">
+                                <canvas id="drawing-canvas" class="w-full h-full rounded-xl"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">التقييم</h3>
+                            <div class="bg-white rounded-xl p-6 h-64">
+                                <div id="writing-feedback" class="space-y-4">
+                                    <div class="text-center text-gray-500 py-8">
+                                        <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <p>اكتب الحرف وسيتم تقييمه هنا</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="text-2xl font-bold gradient-text mb-4">DYS-CONNECT</div>
+                    <p class="text-gray-400 leading-relaxed">
+                        منصة متكاملة للربط الذكي بين جميع فاعلي العملية التعليمية لدعم التكفل المبكر وتعزيز التعلم.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">روابط سريعة</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-white transition-colors">الرئيسية</a></li>
+                        <li><a href="mother-dashboard.html" class="hover:text-white transition-colors">لوحة التحكم</a></li>
+                        <li><a href="interactive-map.html" class="hover:text-white transition-colors">الخريطة</a></li>
+                        <li><a href="pricing.html" class="hover:text-white transition-colors">الأسعار</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">الأدوات</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" onclick="switchTool('summary')" class="hover:text-white transition-colors">تلخيص الدروس</a></li>
+                        <li><a href="#" onclick="switchTool('mindmap')" class="hover:text-white transition-colors">خرائط ذهنية</a></li>
+                        <li><a href="#" onclick="switchTool('exercises')" class="hover:text-white transition-colors">تمارين تفاعلية</a></li>
+                        <li><a href="#" onclick="switchTool('writing')" class="hover:text-white transition-colors">تدريب الكتابة</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">تواصل معنا</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>الجزائر، الوطن</li>
+                        <li>info@dys-connect.dz</li>
+                        <li>+213 555 123 456</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 DYS-CONNECT. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let currentTool = 'summary';
+        let exerciseStats = { correct: 0, incorrect: 0, total: 0 };
+        let mindMapData = null;
+        let drawingCanvas, drawingContext;
+        let isDrawing = false;
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTools();
+            initializeWritingCanvas();
+            initializeExercises();
+            updateWordCount();
+        });
+
+        // Switch between tools
+        function switchTool(toolName) {
+            // Hide all tools
+            document.querySelectorAll('.tool-content').forEach(tool => {
+                tool.classList.add('hidden');
+            });
+            
+            // Show selected tool
+            document.getElementById(toolName + '-tool').classList.remove('hidden');
+            
+            // Update tab styles
+            document.querySelectorAll('.tool-tab').forEach(tab => {
+                tab.classList.remove('border-blue-500', 'border-green-500', 'border-purple-500', 'border-orange-500');
+                tab.classList.add('border-transparent');
+            });
+            
+            const activeTab = document.getElementById(toolName + '-tab');
+            if (toolName === 'summary') activeTab.classList.add('border-blue-500');
+            else if (toolName === 'mindmap') activeTab.classList.add('border-green-500');
+            else if (toolName === 'exercises') activeTab.classList.add('border-purple-500');
+            else if (toolName === 'writing') activeTab.classList.add('border-orange-500');
+            
+            currentTool = toolName;
+            
+            // Initialize specific tool
+            if (toolName === 'exercises') {
+                generateNewExercises();
+            }
+        }
+
+        // Initialize tools
+        function initializeTools() {
+            // Word count for summary tool
+            document.getElementById('lesson-input').addEventListener('input', updateWordCount);
+            
+            // Mind map generation
+            document.getElementById('mindmap-title').addEventListener('input', generateMindMap);
+            document.getElementById('mindmap-branches').addEventListener('input', generateMindMap);
+        }
+
+        // Update word count
+        function updateWordCount() {
+            const text = document.getElementById('lesson-input').value;
+            const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+            document.getElementById('word-count').textContent = wordCount;
+        }
+
+        // Clear input
+        function clearInput() {
+            document.getElementById('lesson-input').value = '';
+            updateWordCount();
+        }
+
+        // Load sample text
+        function loadSampleText() {
+            const sampleText = `النباتات هي كائنات حية مهمة جداً في حياتنا. تقوم النباتات بعملية البناء الضوئي التي تنتج منها الغذاء والأكسجين. تحتاج النباتات إلى الماء والضوء وثاني أكسيد الكربون لكي تنمو. لديها جذور تمتص الماء والمعادن من التربة، وسيقان تحمل الأوراق، وأوراق تقوم بعملية البناء الضوئي. بعض النباتات لها أزهار وثمار. النباتات تساعدنا في الحياة اليومية من خلال توفير الغذاء، الأكسجين، الأدوية، والأخشاب.`;
+            
+            document.getElementById('lesson-input').value = sampleText;
+            updateWordCount();
+        }
+
+        // Generate summary
+        function generateSummary() {
+            const inputText = document.getElementById('lesson-input').value.trim();
+            
+            if (!inputText) {
+                showNotification('الرجاء إدخال نص الدرس أولاً', 'warning');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('summary-output').innerHTML = `
+                <div class="flex items-center justify-center h-32">
+                    <div class="animate-spin w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full"></div>
+                    <span class="mr-3">جارِ التلخيص...</span>
+                </div>
+            `;
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                const summary = generateAISummary(inputText);
+                const reduction = Math.round(((inputText.length - summary.length) / inputText.length) * 100);
+                
+                document.getElementById('summary-output').innerHTML = `
+                    <h4 class="font-bold text-gray-900 mb-3">نقاط أساسية:</h4>
+                    <div class="space-y-2 text-gray-700 leading-relaxed">
+                        ${summary}
+                    </div>
+                `;
+                
+                document.getElementById('reduction-rate').textContent = reduction + '%';
+                showNotification('تم التلخيص بنجاح!', 'success');
+            }, 2000);
+        }
+
+        // Generate AI summary (simplified)
+        function generateAISummary(text) {
+            const sentences = text.split(/[.،؛]/).filter(s => s.trim());
+            const keyPoints = sentences.slice(0, 3).map(s => `• ${s.trim()}`);
+            
+            return keyPoints.join('<br>') + '<br><br>• ' + sentences.slice(-1)[0];
+        }
+
+        // Copy summary
+        function copySummary() {
+            const summaryText = document.getElementById('summary-output').innerText;
+            navigator.clipboard.writeText(summaryText).then(() => {
+                showNotification('تم نسخ الملخص!', 'success');
+            });
+        }
+
+        // Save summary
+        function saveSummary() {
+            showNotification('تم حفظ الملصف في المكتبة', 'success');
+        }
+
+        // Load from library
+        function loadFromLibrary() {
+            showNotification('ميزة المكتبة قريباً!', 'info');
+        }
+
+        // Mind Map Functions
+        function generateMindMap() {
+            const title = document.getElementById('mindmap-title').value || 'العنوان';
+            const branchesText = document.getElementById('mindmap-branches').value;
+            const branches = branchesText.split('\n').filter(b => b.trim());
+            
+            if (branches.length === 0) return;
+            
+            const canvas = document.getElementById('mindmap-canvas');
+            canvas.innerHTML = '';
+            
+            // Create central node
+            const centralNode = document.createElement('div');
+            centralNode.className = 'mindmap-node central';
+            centralNode.textContent = title;
+            centralNode.style.left = '50%';
+            centralNode.style.top = '50%';
+            centralNode.style.transform = 'translate(-50%, -50%)';
+            canvas.appendChild(centralNode);
+            
+            // Create branch nodes
+            const angleStep = (2 * Math.PI) / branches.length;
+            const radius = 120;
+            
+            branches.forEach((branch, index) => {
+                const angle = index * angleStep - Math.PI / 2;
+                const x = 50 + Math.cos(angle) * radius / 4;
+                const y = 50 + Math.sin(angle) * radius / 4;
+                
+                // Create connection line
+                const connection = document.createElement('div');
+                connection.className = 'mindmap-connection';
+                connection.style.left = '50%';
+                connection.style.top = '50%';
+                connection.style.width = radius + 'px';
+                connection.style.transform = `rotate(${angle * 180 / Math.PI}deg)`;
+                canvas.appendChild(connection);
+                
+                // Create branch node
+                const branchNode = document.createElement('div');
+                branchNode.className = 'mindmap-node';
+                branchNode.textContent = branch;
+                branchNode.style.left = x + '%';
+                branchNode.style.top = y + '%';
+                branchNode.style.transform = 'translate(-50%, -50%)';
+                canvas.appendChild(branchNode);
+            });
+            
+            mindMapData = { title, branches };
+        }
+
+        // Clear mind map
+        function clearMindMap() {
+            document.getElementById('mindmap-canvas').innerHTML = `
+                <div class="absolute inset-0 flex items-center justify-center text-gray-500">
+                    <div class="text-center">
+                        <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
+                        <p>اضغط على "إنشاء الخريطة" لعرض الخريطة الذهنية</p>
+                    </div>
+                </div>
+            `;
+            mindMapData = null;
+        }
+
+        // Export mind map
+        function exportMindMap() {
+            if (!mindMapData) {
+                showNotification('الرجاء إنشاء الخريطة أولاً', 'warning');
+                return;
+            }
+            
+            showNotification('تم تصدير الخريطة بنجاح!', 'success');
+        }
+
+        // Initialize exercises
+        function initializeExercises() {
+            generateNewExercises();
+        }
+
+        // Generate new exercises
+        function generateNewExercises() {
+            const container = document.getElementById('exercises-container');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 6; i++) {
+                const exercise = generateMathExercise();
+                container.appendChild(exercise);
+            }
+        }
+
+        // Generate math exercise
+        function generateMathExercise() {
+            const operations = ['+', '-', '×'];
+            const operation = operations[Math.floor(Math.random() * operations.length)];
+            let num1, num2, answer;
+            
+            switch(operation) {
+                case '+':
+                    num1 = Math.floor(Math.random() * 20) + 1;
+                    num2 = Math.floor(Math.random() * 20) + 1;
+                    answer = num1 + num2;
+                    break;
+                case '-':
+                    num1 = Math.floor(Math.random() * 20) + 10;
+                    num2 = Math.floor(Math.random() * num1) + 1;
+                    answer = num1 - num2;
+                    break;
+                case '×':
+                    num1 = Math.floor(Math.random() * 10) + 1;
+                    num2 = Math.floor(Math.random() * 10) + 1;
+                    answer = num1 * num2;
+                    break;
+            }
+            
+            const card = document.createElement('div');
+            card.className = 'exercise-card';
+            card.innerHTML = `
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900 mb-4">
+                        ${num1} ${operation} ${num2} = ?
+                    </div>
+                    <input type="number" class="w-full p-3 border border-gray-300 rounded-lg text-center text-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="الإجابة" onchange="checkAnswer(this, ${answer})">
+                    <div class="mt-3 text-sm text-gray-600">
+                        أدخل الإجابة الصحيحة
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Check answer
+        function checkAnswer(input, correctAnswer) {
+            const userAnswer = parseInt(input.value);
+            const card = input.closest('.exercise-card');
+            
+            exerciseStats.total++;
+            
+            if (userAnswer === correctAnswer) {
+                card.classList.add('correct');
+                card.classList.remove('incorrect');
+                exerciseStats.correct++;
+                showNotification('إجابة صحيحة!', 'success');
+            } else {
+                card.classList.add('incorrect');
+                card.classList.remove('correct');
+                exerciseStats.incorrect++;
+                showNotification('إجابة خاطئة، حاول مرة أخرى', 'error');
+            }
+            
+            updateExerciseStats();
+        }
+
+        // Update exercise stats
+        function updateExerciseStats() {
+            document.getElementById('exercise-score').textContent = `${exerciseStats.correct}/${exerciseStats.total}`;
+            document.getElementById('correct-count').textContent = exerciseStats.correct;
+            document.getElementById('incorrect-count').textContent = exerciseStats.incorrect;
+            
+            const accuracy = exerciseStats.total > 0 ? Math.round((exerciseStats.correct / exerciseStats.total) * 100) : 0;
+            document.getElementById('accuracy-rate').textContent = accuracy + '%';
+        }
+
+        // Reset stats
+        function resetStats() {
+            exerciseStats = { correct: 0, incorrect: 0, total: 0 };
+            updateExerciseStats();
+            showNotification('تم إعادة تعيين الإحصائيات', 'info');
+        }
+
+        // Initialize writing canvas
+        function initializeWritingCanvas() {
+            drawingCanvas = document.getElementById('drawing-canvas');
+            drawingContext = drawingCanvas.getContext('2d');
+            
+            // Set canvas size
+            drawingCanvas.width = drawingCanvas.offsetWidth;
+            drawingCanvas.height = drawingCanvas.offsetHeight;
+            
+            // Drawing settings
+            drawingContext.lineWidth = 3;
+            drawingContext.lineCap = 'round';
+            drawingContext.strokeStyle = '#374151';
+            
+            // Event listeners
+            drawingCanvas.addEventListener('mousedown', startDrawing);
+            drawingCanvas.addEventListener('mousemove', draw);
+            drawingCanvas.addEventListener('mouseup', stopDrawing);
+            drawingCanvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile
+            drawingCanvas.addEventListener('touchstart', handleTouch);
+            drawingCanvas.addEventListener('touchmove', handleTouch);
+            drawingCanvas.addEventListener('touchend', stopDrawing);
+        }
+
+        // Drawing functions
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = drawingCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            drawingContext.beginPath();
+            drawingContext.moveTo(x, y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = drawingCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            drawingContext.lineTo(x, y);
+            drawingContext.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                             e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            drawingCanvas.dispatchEvent(mouseEvent);
+        }
+
+        // Clear canvas
+        function clearCanvas() {
+            drawingContext.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+            document.getElementById('writing-feedback').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p>اكتب الحرف وسيتم تقييمه هنا</p>
+                </div>
+            `;
+        }
+
+        // Evaluate writing
+        function evaluateWriting() {
+            // Simulate writing evaluation
+            const feedback = [
+                { type: 'success', text: 'شكل الحرف ممتاز!' },
+                { type: 'warning', text: 'حاول تحسين الاتجاه' },
+                { type: 'info', text: 'الحجم مناسب' },
+                { type: 'success', text: 'الضغط جيد' }
+            ];
+            
+            const feedbackHTML = feedback.map(item => `
+                <div class="flex items-center p-3 rounded-lg ${
+                    item.type === 'success' ? 'bg-green-50 text-green-800' :
+                    item.type === 'warning' ? 'bg-yellow-50 text-yellow-800' :
+                    'bg-blue-50 text-blue-800'
+                }">
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    ${item.text}
+                </div>
+            `).join('');
+            
+            document.getElementById('writing-feedback').innerHTML = feedbackHTML;
+            showNotification('تم تقييم الكتابة!', 'success');
+        }
+
+        // Notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transform translate-x-full transition-transform duration-300`;
+            
+            switch(type) {
+                case 'success':
+                    notification.classList.add('bg-green-500', 'text-white');
+                    break;
+                case 'error':
+                    notification.classList.add('bg-red-500', 'text-white');
+                    break;
+                case 'warning':
+                    notification.classList.add('bg-yellow-500', 'text-white');
+                    break;
+                default:
+                    notification.classList.add('bg-blue-500', 'text-white');
+            }
+            
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <span class="flex-1">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white/80 hover:text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+    </script>
+    <script src="main.js"></script>`n</body>
+</html>
