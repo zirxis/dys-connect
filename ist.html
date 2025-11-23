@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أداة التشخيص - DYS-CONNECT</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-red': '#C41E3A',
+                        'secondary-red': '#E85A4F',
+                        'accent-orange': '#F28B30',
+                        'warm-beige': '#F5F1E8',
+                        'deep-brown': '#8B4513',
+                        'soft-cream': '#FDF6E3',
+                        'muted-gold': '#D4AF37',
+                        'gentle-gray': '#6C757D'
+                    },
+                    fontFamily: {
+                        'cairo': ['Cairo', 'sans-serif'],
+                        'amiri': ['Amiri', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Amiri', serif;
+            background-color: #F5F1E8;
+        }
+        
+        .hero-bg {
+            background: linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(232, 90, 79, 0.1) 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(196, 30, 58, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #A01729 0%, #D64541 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.3);
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, #F28B30 0%, #D4AF37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .diagnostic-step {
+            display: none;
+        }
+        
+        .diagnostic-step.active {
+            display: block;
+            animation: slideIn 0.5s ease-in-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        
+        .question-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid rgba(196, 30, 58, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .question-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(196, 30, 58, 0.15);
+        }
+        
+        .option-btn {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .option-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .option-btn.selected {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .audio-visualizer {
+            background: linear-gradient(135deg, #E85A4F 0%, #F28B30 100%);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid rgba(196, 30, 58, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(196, 30, 58, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-warm-beige">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-sm shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="text-2xl font-bold text-primary-red font-cairo">DYS-CONNECT</div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الرئيسية</a>
+                        <a href="#diagnostic" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">أداة التشخيص</a>
+                        <a href="#features" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">المميزات</a>
+                        <a href="dashboard.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">لوحة التحكم</a>
+                        <a href="plans.html" class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium">الأسعار</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-deep-brown hover:text-primary-red">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="#home" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">الرئيسية</a>
+                <a href="#diagnostic" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">أداة التشخيص</a>
+                <a href="#features" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">المميزات</a>
+                <a href="dashboard.html" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">لوحة التحكم</a>
+                <a href="plans.html" class="btn-primary text-white block px-3 py-2 rounded-md text-base font-medium text-center">الأسعار</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg min-h-screen flex items-center pt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-right">
+                    <h1 class="text-5xl lg:text-6xl font-bold text-deep-brown font-cairo mb-6">
+                        أداة التشخيص الذكي
+                    </h1>
+                    <p class="text-xl text-gentle-gray font-amiri mb-8 leading-relaxed">
+                        اكتشف صعوبات التعلم مبكراً باستخدام أدوات التشخيص المتقدمة التي تجمع بين الاستبيانات العلمية والتشخيص الصوتي
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a href="#diagnostic" class="btn-primary text-white px-8 py-4 rounded-lg text-lg font-medium">
+                            ابدأ التشخيص الآن
+                        </a>
+                        <a href="#features" class="border-2 border-primary-red text-primary-red hover:bg-primary-red hover:text-white px-8 py-4 rounded-lg text-lg font-medium transition-all">
+                            تعرف أكثر
+                        </a>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="resources/diagnostic-hero.jpg" alt="أداة التشخيص DYS-CONNECT" class="w-full h-auto rounded-2xl shadow-2xl floating">
+                    <div class="absolute -top-4 -left-4 w-20 h-20 bg-accent-orange rounded-full opacity-20 floating" style="animation-delay: -2s;"></div>
+                    <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-secondary-red rounded-full opacity-10 floating" style="animation-delay: -4s;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Diagnostic Tool Section -->
+    <section id="diagnostic" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl font-bold text-deep-brown font-cairo mb-4">أداة التشخيص المتكاملة</h2>
+                <p class="text-xl text-gentle-gray font-amiri max-w-3xl mx-auto">
+                    استخدم أدواتنا المتقدمة لتقييم صعوبات التعلم بشكل دقيق وشامل
+                </p>
+            </div>
+            
+            <!-- Diagnostic Tool Navigation -->
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button onclick="switchDiagnosticTool('questionnaire')" id="questionnaire-tab" class="px-6 py-3 rounded-xl bg-white shadow-lg border-2 border-primary-red transition-all">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        استبيان تشخيصي
+                    </div>
+                </button>
+                
+                <button onclick="switchDiagnosticTool('audio')" id="audio-tab" class="px-6 py-3 rounded-xl bg-white shadow-lg border-2 border-transparent hover:border-green-500 transition-all">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                        </svg>
+                        تشخيص صوتي
+                    </div>
+                </button>
+            </div>
+            
+            <!-- Diagnostic Tool Content -->
+            <div class="bg-soft-cream rounded-2xl p-8 shadow-xl">
+                
+                <!-- Questionnaire Tool -->
+                <div id="questionnaire-tool" class="diagnostic-tool">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo">الاستبيان التشخيصي</h3>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm text-gentle-gray font-amiri">تقدم: <span id="question-progress">0%</span></span>
+                            <button onclick="resetQuestionnaire()" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                                إعادة تعيين
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-8">
+                        <div id="questionnaire-progress-bar" class="progress-bar bg-primary-red h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                    
+                    <!-- Questionnaire Steps -->
+                    <div id="questionnaire-steps">
+                        <!-- Step 1: Child Information -->
+                        <div id="step-1" class="diagnostic-step active">
+                            <div class="text-center mb-8">
+                                <h4 class="text-xl font-bold text-deep-brown font-cairo mb-2">معلومات الطفل</h4>
+                                <p class="text-gentle-gray font-amiri">أدخل المعلومات الأساسية عن الطفل لتخصيص التشخيص</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">اسم الطفل</label>
+                                    <input type="text" id="child-name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent" placeholder="أدخل اسم الطفل">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">العمر</label>
+                                    <input type="number" id="child-age" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent" placeholder="أدخل عمر الطفل">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">الجنس</label>
+                                    <select id="child-gender" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent">
+                                        <option value="">اختر الجنس</option>
+                                        <option value="boy">ذكر</option>
+                                        <option value="girl">أنثى</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-deep-brown font-cairo mb-2">المدرسة</label>
+                                    <input type="text" id="child-school" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent" placeholder="اسم المدرسة">
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between mt-8">
+                                <button class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors opacity-0">
+                                    السابق
+                                </button>
+                                <button onclick="nextQuestionnaireStep()" class="btn-primary text-white px-8 py-3 rounded-lg font-medium">
+                                    التالي
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 2: Reading Skills -->
+                        <div id="step-2" class="diagnostic-step">
+                            <div class="text-center mb-8">
+                                <h4 class="text-xl font-bold text-deep-brown font-cairo mb-2">مهارات القراءة</h4>
+                                <p class="text-gentle-gray font-amiri">تقييم قدرات الطفل في القراءة والاستيعاب</p>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يواجه الطفل صعوبة في قراءة الكلمات البسيطة؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يخلط الطفل بين الحروف المتشابهة (ب/ت/ث)؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يقرأ الطفل ببطء شديد مقارنة بأقرانه؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between mt-8">
+                                <button onclick="prevQuestionnaireStep()" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                    السابق
+                                </button>
+                                <button onclick="nextQuestionnaireStep()" class="btn-primary text-white px-8 py-3 rounded-lg font-medium">
+                                    التالي
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Writing Skills -->
+                        <div id="step-3" class="diagnostic-step">
+                            <div class="text-center mb-8">
+                                <h4 class="text-xl font-bold text-deep-brown font-cairo mb-2">مهارات الكتابة</h4>
+                                <p class="text-gentle-gray font-amiri">تقييم قدرات الطفل في الكتابة والتعبير الكتابي</p>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يجد الطفل صعوبة في الإمساك بالقلم بشكل صحيح؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يكتب الطفل الحروف بشكل معكوس أو مقلوب؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يجد الطفل صعوبة في تنظيم الأفكار كتابياً؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between mt-8">
+                                <button onclick="prevQuestionnaireStep()" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                    السابق
+                                </button>
+                                <button onclick="nextQuestionnaireStep()" class="btn-primary text-white px-8 py-3 rounded-lg font-medium">
+                                    التالي
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 4: Math Skills -->
+                        <div id="step-4" class="diagnostic-step">
+                            <div class="text-center mb-8">
+                                <h4 class="text-xl font-bold text-deep-brown font-cairo mb-2">مهارات الرياضيات</h4>
+                                <p class="text-gentle-gray font-amiri">تقييم قدرات الطفل في الرياضيات والتفكير المنطقي</p>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يجد الطفل صعوبة في العد أو التعرف على الأرقام؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يخلط الطفل بين العمليات الحسابية (الجمع والطرح)؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يجد الطفل صعوبة في حل المسائل الكلامية؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between mt-8">
+                                <button onclick="prevQuestionnaireStep()" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                    السابق
+                                </button>
+                                <button onclick="nextQuestionnaireStep()" class="btn-primary text-white px-8 py-3 rounded-lg font-medium">
+                                    التالي
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 5: Attention & Behavior -->
+                        <div id="step-5" class="diagnostic-step">
+                            <div class="text-center mb-8">
+                                <h4 class="text-xl font-bold text-deep-brown font-cairo mb-2">الانتباه والسلوك</h4>
+                                <p class="text-gentle-gray font-amiri">تقييم قدرات الطفل على التركيز والتحكم في السلوك</p>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يجد الطفل صعوبة في الحفاظ على التركيز لفترة طويلة؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يتحرك الطفل بشكل مفرط أو يجد صعوبة في الجلوس بهدوء؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="question-card p-6 rounded-2xl">
+                                    <h5 class="text-lg font-bold text-deep-brown font-cairo mb-4">هل يجد الطفل صعوبة في اتباع التعليمات المتعددة الخطوات؟</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="never">أبداً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="rarely">نادراً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="sometimes">أحياناً</button>
+                                        <button class="option-btn p-4 bg-white border border-gray-300 rounded-lg text-center" data-value="often">غالباً</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between mt-8">
+                                <button onclick="prevQuestionnaireStep()" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                    السابق
+                                </button>
+                                <button onclick="nextQuestionnaireStep()" class="btn-primary text-white px-8 py-3 rounded-lg font-medium">
+                                    إنهاء الاستبيان
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 6: Results -->
+                        <div id="step-6" class="diagnostic-step">
+                            <div class="text-center mb-8">
+                                <h4 class="text-2xl font-bold text-deep-brown font-cairo mb-2">نتائج التشخيص</h4>
+                                <p class="text-gentle-gray font-amiri">تحليل شامل لقدرات الطفل وتوصيات مخصصة</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                                <!-- Results Summary -->
+                                <div class="result-card p-6 rounded-2xl">
+                                    <h5 class="text-xl font-bold text-deep-brown font-cairo mb-4">ملخص النتائج</h5>
+                                    <div class="space-y-4">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gentle-gray font-amiri">مهارات القراءة:</span>
+                                            <div class="flex items-center">
+                                                <div class="w-24 h-2 bg-gray-200 rounded-full mr-2">
+                                                    <div id="reading-score" class="h-2 bg-primary-red rounded-full" style="width: 0%"></div>
+                                                </div>
+                                                <span id="reading-percent" class="text-sm font-bold text-deep-brown">0%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gentle-gray font-amiri">مهارات الكتابة:</span>
+                                            <div class="flex items-center">
+                                                <div class="w-24 h-2 bg-gray-200 rounded-full mr-2">
+                                                    <div id="writing-score" class="h-2 bg-primary-red rounded-full" style="width: 0%"></div>
+                                                </div>
+                                                <span id="writing-percent" class="text-sm font-bold text-deep-brown">0%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gentle-gray font-amiri">مهارات الرياضيات:</span>
+                                            <div class="flex items-center">
+                                                <div class="w-24 h-2 bg-gray-200 rounded-full mr-2">
+                                                    <div id="math-score" class="h-2 bg-primary-red rounded-full" style="width: 0%"></div>
+                                                </div>
+                                                <span id="math-percent" class="text-sm font-bold text-deep-brown">0%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gentle-gray font-amiri">الانتباه والتركيز:</span>
+                                            <div class="flex items-center">
+                                                <div class="w-24 h-2 bg-gray-200 rounded-full mr-2">
+                                                    <div id="attention-score" class="h-2 bg-primary-red rounded-full" style="width: 0%"></div>
+                                                </div>
+                                                <span id="attention-percent" class="text-sm font-bold text-deep-brown">0%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Recommendations -->
+                                <div class="result-card p-6 rounded-2xl">
+                                    <h5 class="text-xl font-bold text-deep-brown font-cairo mb-4">التوصيات</h5>
+                                    <div id="recommendations" class="space-y-3">
+                                        <div class="flex items-start">
+                                            <div class="text-primary-red text-xl ml-2">•</div>
+                                            <p class="text-gentle-gray font-amiri">جاري تحليل النتائج...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                <button onclick="saveResults()" class="btn-primary text-white px-8 py-3 rounded-lg font-medium">
+                                    حفظ النتائج
+                                </button>
+                                <button onclick="shareResults()" class="border-2 border-primary-red text-primary-red hover:bg-primary-red hover:text-white px-8 py-3 rounded-lg font-medium transition-all">
+                                    مشاركة النتائج
+                                </button>
+                                <button onclick="resetQuestionnaire()" class="border-2 border-gray-300 text-gray-700 hover:bg-gray-100 px-8 py-3 rounded-lg font-medium transition-all">
+                                    تشخيص جديد
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Audio Diagnostic Tool -->
+                <div id="audio-tool" class="diagnostic-tool hidden">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo">التشخيص الصوتي</h3>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm text-gentle-gray font-amiri">تحليل النطق واللغة</span>
+                            <button onclick="resetAudioDiagnostic()" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                                إعادة تعيين
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Audio Recording Section -->
+                        <div class="result-card p-6 rounded-2xl">
+                            <h5 class="text-xl font-bold text-deep-brown font-cairo mb-4">التسجيل الصوتي</h5>
+                            <p class="text-gentle-gray font-amiri mb-6">سجل صوت الطفل أثناء قراءة النص التالي لتحليل النطق والطلاقة</p>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                                <p class="text-deep-brown font-amiri text-center leading-relaxed">
+                                    "ذهب أحمد إلى المدرسة مع صديقه خالد. في الطريق، رأيا حديقة جميلة فيها أزهار ملونة وأشجار عالية. دخل أحمد وخالد إلى الحديقة وفرحا باللعب بين الأزهار."
+                                </p>
+                            </div>
+                            
+                            <div class="flex flex-col items-center space-y-6">
+                                <!-- Audio Visualizer -->
+                                <div class="audio-visualizer w-32 h-32 flex items-center justify-center">
+                                    <div class="text-white text-3xl" id="audio-icon">🎤</div>
+                                </div>
+                                
+                                <!-- Recording Controls -->
+                                <div class="flex space-x-4">
+                                    <button id="record-btn" onclick="startRecording()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium">
+                                        بدء التسجيل
+                                    </button>
+                                    <button id="stop-btn" onclick="stopRecording()" class="border-2 border-primary-red text-primary-red hover:bg-primary-red hover:text-white px-6 py-3 rounded-lg font-medium transition-all hidden">
+                                        إيقاف التسجيل
+                                    </button>
+                                </div>
+                                
+                                <!-- Recording Status -->
+                                <div id="recording-status" class="text-center">
+                                    <p class="text-gentle-gray font-amiri">انقر على "بدء التسجيل" لبدء تحليل النطق</p>
+                                </div>
+                                
+                                <!-- Audio Player -->
+                                <div id="audio-player" class="hidden w-full">
+                                    <audio id="recorded-audio" controls class="w-full"></audio>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Analysis Results -->
+                        <div class="result-card p-6 rounded-2xl">
+                            <h5 class="text-xl font-bold text-deep-brown font-cairo mb-4">نتائج التحليل</h5>
+                            <p class="text-gentle-gray font-amiri mb-6">سيتم عرض نتائج تحليل النطق والطلاقة هنا بعد التسجيل</p>
+                            
+                            <div id="audio-analysis-results" class="space-y-4">
+                                <div class="text-center py-8">
+                                    <div class="text-5xl mb-4">🎯</div>
+                                    <p class="text-gentle-gray font-amiri">سيتم عرض نتائج تحليل النطق هنا بعد التسجيل</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Analysis Progress -->
+                            <div id="analysis-progress" class="hidden mt-6">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm text-gentle-gray font-amiri">تقدم التحليل</span>
+                                    <span class="text-sm text-gentle-gray font-amiri" id="analysis-percent">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="analysis-progress-bar" class="progress-bar bg-primary-red h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-warm-beige">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl font-bold text-deep-brown font-cairo mb-4">مميزات أداة التشخيص</h2>
+                <p class="text-xl text-gentle-gray font-amiri max-w-3xl mx-auto">
+                    أدوات متقدمة تجمع بين العلم والتكنولوجيا لتقديم تشخيص دقيق وشامل
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="text-center reveal card-hover bg-white p-8 rounded-2xl">
+                    <div class="text-5xl mb-4 feature-icon">📊</div>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">تحليل علمي دقيق</h3>
+                    <p class="text-gentle-gray font-amiri">استبيانات معيارية مبنية على أحدث الأبحاث العلمية في مجال صعوبات التعلم</p>
+                </div>
+                
+                <div class="text-center reveal card-hover bg-white p-8 rounded-2xl">
+                    <div class="text-5xl mb-4 feature-icon">🎤</div>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">تشخيص صوتي متقدم</h3>
+                    <p class="text-gentle-gray font-amiri">تحليل النطق والطلاقة باستخدام تقنيات الذكاء الاصطناعي المتقدمة</p>
+                </div>
+                
+                <div class="text-center reveal card-hover bg-white p-8 rounded-2xl">
+                    <div class="text-5xl mb-4 feature-icon">📋</div>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">توصيات مخصصة</h3>
+                    <p class="text-gentle-gray font-amiri">خطط علاجية وتدريبية مخصصة بناءً على نتائج التشخيص الدقيقة</p>
+                </div>
+                
+                <div class="text-center reveal card-hover bg-white p-8 rounded-2xl">
+                    <div class="text-5xl mb-4 feature-icon">📈</div>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">متابعة التقدم</h3>
+                    <p class="text-gentle-gray font-amiri">تتبع تطور الطفل ومقارنة النتائج عبر الزمن لتقييم فعالية التدخل</p>
+                </div>
+                
+                <div class="text-center reveal card-hover bg-white p-8 rounded-2xl">
+                    <div class="text-5xl mb-4 feature-icon">👥</div>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">تواصل مع المختصين</h3>
+                    <p class="text-gentle-gray font-amiri">ربط مباشر مع المختصين المناسبين بناءً على نتائج التشخيص</p>
+                </div>
+                
+                <div class="text-center reveal card-hover bg-white p-8 rounded-2xl">
+                    <div class="text-5xl mb-4 feature-icon">🔒</div>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">خصوصية وأمان</h3>
+                    <p class="text-gentle-gray font-amiri">بياناتك محمية بأعلى معايير الأمان والخصوصية</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-deep-brown text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="text-3xl font-bold text-muted-gold font-cairo mb-4">DYS-CONNECT</div>
+                <p class="text-lg font-amiri mb-6">منصة جزائرية للتكفل الذكي والمبكر بالأطفال</p>
+                <div class="border-t border-gray-600 pt-6">
+                    <p class="text-sm font-amiri">© 2025 DYS-CONNECT. جميع الحقوق محفوظة.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Diagnostic Tool Functionality
+        let currentQuestionnaireStep = 1;
+        const totalQuestionnaireSteps = 6;
+        let questionnaireAnswers = {};
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeQuestionnaire();
+            setupEventListeners();
+            initializeScrollAnimations();
+            initializeMobileMenu();
+        });
+        
+        function initializeQuestionnaire() {
+            // Set up option button event listeners
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const questionCard = this.closest('.question-card');
+                    const questionText = questionCard.querySelector('h5').textContent;
+                    
+                    // Remove selected class from all buttons in this question
+                    questionCard.querySelectorAll('.option-btn').forEach(b => {
+                        b.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked button
+                    this.classList.add('selected');
+                    
+                    // Store the answer
+                    questionnaireAnswers[questionText] = this.getAttribute('data-value');
+                    
+                    updateQuestionnaireProgress();
+                });
+            });
+        }
+        
+        function setupEventListeners() {
+            // Mobile menu
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        }
+        
+        function initializeScrollAnimations() {
+            const revealElements = document.querySelectorAll('.reveal');
+            
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+            
+            revealElements.forEach(element => {
+                revealObserver.observe(element);
+            });
+        }
+        
+        function initializeMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        }
+        
+        function switchDiagnosticTool(toolName) {
+            // Hide all tools
+            document.querySelectorAll('.diagnostic-tool').forEach(tool => {
+                tool.classList.add('hidden');
+            });
+            
+            // Show selected tool
+            document.getElementById(toolName + '-tool').classList.remove('hidden');
+            
+            // Update tab styles
+            document.querySelectorAll('.diagnostic-tool-tab').forEach(tab => {
+                tab.classList.remove('border-primary-red');
+                tab.classList.add('border-transparent');
+            });
+            
+            const activeTab = document.getElementById(toolName + '-tab');
+            activeTab.classList.remove('border-transparent');
+            activeTab.classList.add('border-primary-red');
+        }
+        
+        function nextQuestionnaireStep() {
+            if (validateCurrentStep()) {
+                if (currentQuestionnaireStep < totalQuestionnaireSteps) {
+                    document.getElementById(`step-${currentQuestionnaireStep}`).classList.remove('active');
+                    currentQuestionnaireStep++;
+                    document.getElementById(`step-${currentQuestionnaireStep}`).classList.add('active');
+                    updateQuestionnaireProgress();
+                    
+                    if (currentQuestionnaireStep === totalQuestionnaireSteps) {
+                        calculateResults();
+                    }
+                }
+            }
+        }
+        
+        function prevQuestionnaireStep() {
+            if (currentQuestionnaireStep > 1) {
+                document.getElementById(`step-${currentQuestionnaireStep}`).classList.remove('active');
+                currentQuestionnaireStep--;
+                document.getElementById(`step-${currentQuestionnaireStep}`).classList.add('active');
+                updateQuestionnaireProgress();
+            }
+        }
+        
+        function validateCurrentStep() {
+            if (currentQuestionnaireStep === 1) {
+                // Validate child information
+                const name = document.getElementById('child-name').value;
+                const age = document.getElementById('child-age').value;
+                const gender = document.getElementById('child-gender').value;
+                
+                if (!name || !age || !gender) {
+                    showNotification('يرجى تعبئة جميع معلومات الطفل', 'error');
+                    return false;
+                }
+                
+                return true;
+            } else {
+                // Validate questions in current step
+                const currentStep = document.getElementById(`step-${currentQuestionnaireStep}`);
+                const questions = currentStep.querySelectorAll('.question-card');
+                
+                for (let question of questions) {
+                    const questionText = question.querySelector('h5').textContent;
+                    if (!questionnaireAnswers[questionText]) {
+                        showNotification('يرجى الإجابة على جميع الأسئلة', 'error');
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+        }
+        
+        function updateQuestionnaireProgress() {
+            const progress = ((currentQuestionnaireStep - 1) / (totalQuestionnaireSteps - 1)) * 100;
+            document.getElementById('questionnaire-progress-bar').style.width = `${progress}%`;
+            document.getElementById('question-progress').textContent = `${Math.round(progress)}%`;
+        }
+        
+        function calculateResults() {
+            // Calculate scores based on answers
+            let readingScore = 0;
+            let writingScore = 0;
+            let mathScore = 0;
+            let attentionScore = 0;
+            
+            // Score mapping
+            const scoreMap = {
+                'never': 0,
+                'rarely': 25,
+                'sometimes': 50,
+                'often': 100
+            };
+            
+            // Calculate reading score (questions from step 2)
+            const readingQuestions = [
+                'هل يواجه الطفل صعوبة في قراءة الكلمات البسيطة؟',
+                'هل يخلط الطفل بين الحروف المتشابهة (ب/ت/ث)؟',
+                'هل يقرأ الطفل ببطء شديد مقارنة بأقرانه؟'
+            ];
+            
+            readingQuestions.forEach(question => {
+                if (questionnaireAnswers[question]) {
+                    readingScore += scoreMap[questionnaireAnswers[question]];
+                }
+            });
+            readingScore = Math.min(100, Math.round(readingScore / readingQuestions.length));
+            
+            // Calculate writing score (questions from step 3)
+            const writingQuestions = [
+                'هل يجد الطفل صعوبة في الإمساك بالقلم بشكل صحيح؟',
+                'هل يكتب الطفل الحروف بشكل معكوس أو مقلوب؟',
+                'هل يجد الطفل صعوبة في تنظيم الأفكار كتابياً؟'
+            ];
+            
+            writingQuestions.forEach(question => {
+                if (questionnaireAnswers[question]) {
+                    writingScore += scoreMap[questionnaireAnswers[question]];
+                }
+            });
+            writingScore = Math.min(100, Math.round(writingScore / writingQuestions.length));
+            
+            // Calculate math score (questions from step 4)
+            const mathQuestions = [
+                'هل يجد الطفل صعوبة في العد أو التعرف على الأرقام؟',
+                'هل يخلط الطفل بين العمليات الحسابية (الجمع والطرح)؟',
+                'هل يجد الطفل صعوبة في حل المسائل الكلامية؟'
+            ];
+            
+            mathQuestions.forEach(question => {
+                if (questionnaireAnswers[question]) {
+                    mathScore += scoreMap[questionnaireAnswers[question]];
+                }
+            });
+            mathScore = Math.min(100, Math.round(mathScore / mathQuestions.length));
+            
+            // Calculate attention score (questions from step 5)
+            const attentionQuestions = [
+                'هل يجد الطفل صعوبة في الحفاظ على التركيز لفترة طويلة؟',
+                'هل يتحرك الطفل بشكل مفرط أو يجد صعوبة في الجلوس بهدوء؟',
+                'هل يجد الطفل صعوبة في اتباع التعليمات المتعددة الخطوات؟'
+            ];
+            
+            attentionQuestions.forEach(question => {
+                if (questionnaireAnswers[question]) {
+                    attentionScore += scoreMap[questionnaireAnswers[question]];
+                }
+            });
+            attentionScore = Math.min(100, Math.round(attentionScore / attentionQuestions.length));
+            
+            // Update UI with scores
+            document.getElementById('reading-score').style.width = `${readingScore}%`;
+            document.getElementById('reading-percent').textContent = `${readingScore}%`;
+            
+            document.getElementById('writing-score').style.width = `${writingScore}%`;
+            document.getElementById('writing-percent').textContent = `${writingScore}%`;
+            
+            document.getElementById('math-score').style.width = `${mathScore}%`;
+            document.getElementById('math-percent').textContent = `${mathScore}%`;
+            
+            document.getElementById('attention-score').style.width = `${attentionScore}%`;
+            document.getElementById('attention-percent').textContent = `${attentionScore}%`;
+            
+            // Generate recommendations
+            generateRecommendations(readingScore, writingScore, mathScore, attentionScore);
+            
+            // Animate progress bars
+            anime({
+                targets: '#reading-score, #writing-score, #math-score, #attention-score',
+                width: [
+                    {value: '0%', duration: 0},
+                    {value: [`${readingScore}%`, `${writingScore}%`, `${mathScore}%`, `${attentionScore}%`], duration: 1000}
+                ],
+                easing: 'easeOutQuad',
+                delay: anime.stagger(200)
+            });
+        }
+        
+        function generateRecommendations(reading, writing, math, attention) {
+            const recommendationsContainer = document.getElementById('recommendations');
+            let recommendations = [];
+            
+            // Reading recommendations
+            if (reading >= 70) {
+                recommendations.push('مهارات القراءة جيدة بشكل عام، مع وجود بعض التحديات البسيطة التي يمكن تحسينها');
+                recommendations.push('الاستمرار في القراءة اليومية لتحسين الطلاقة والمفردات');
+            } else if (reading >= 40) {
+                recommendations.push('يوجد صعوبات متوسطة في القراءة تحتاج إلى تدخل مكثف');
+                recommendations.push('التركيز على تمارين التعرف على الحروف والكلمات البصرية');
+                recommendations.push('استخدام الكتب المصورة والوسائل البصرية لتحسين الفهم');
+            } else {
+                recommendations.push('صعوبات كبيرة في القراءة تحتاج إلى تدخل فوري ومتخصص');
+                recommendations.push('اللجوء إلى مختص في صعوبات التعلم للتقييم الشامل');
+                recommendations.push('استخدام برامج القراءة المتخصصة والتدريبات المكثفة');
+            }
+            
+            // Writing recommendations
+            if (writing >= 70) {
+                recommendations.push('مهارات الكتابة مقبولة مع وجود مجال للتحسين في بعض الجوانب');
+                recommendations.push('ممارسة الكتابة اليومية لتحسين الخط والسرعة');
+            } else if (writing >= 40) {
+                recommendations.push('يوجد صعوبات متوسطة في الكتابة تحتاج إلى تدريب مكثف');
+                recommendations.push('تمارين تقوية عضلات اليد لتحسين الإمساك بالقلم');
+                recommendations.push('استخدام الأدوات المساعدة مثل أقلام التصحيح');
+            } else {
+                recommendations.push('صعوبات كبيرة في الكتابة تحتاج إلى تدخل متخصص');
+                recommendations.push('استخدام لوحة المفاتيب كبديل مؤقت للكتابة اليدوية');
+                recommendations.push('اللجوء إلى أخصائي العلاج الوظيفي لتقييم المهارات الحركية الدقيقة');
+            }
+            
+            // Math recommendations
+            if (math >= 70) {
+                recommendations.push('مهارات الرياضيات جيدة بشكل عام مع وجود بعض التحديات');
+                recommendations.push('التركيز على حل المسائل الكلامية لتحسين الفهم');
+            } else if (math >= 40) {
+                recommendations.push('يوجد صعوبات متوسطة في الرياضيات تحتاج إلى تدريب مكثف');
+                recommendations.push('استخدام الوسائل البصرية والملموسة لشرح المفاهيم الرياضية');
+                recommendations.push('التركيز على الأساسيات قبل الانتقال إلى المفاهيم المعقدة');
+            } else {
+                recommendations.push('صعوبات كبيرة في الرياضيات تحتاج إلى تدخل متخصص');
+                recommendations.push('اللجوء إلى مختص في صعوبات تعلم الرياضيات');
+                recommendations.push('استخدام استراتيجيات التعلم متعدد الحواس');
+            }
+            
+            // Attention recommendations
+            if (attention >= 70) {
+                recommendations.push('مستوى الانتباه مقبول مع وجود بعض التحديات في التركيز');
+                recommendations.push('استخدام استراتيجيات تقسيم المهام إلى أجزاء صغيرة');
+            } else if (attention >= 40) {
+                recommendations.push('يوجد صعوبات متوسطة في الانتباه والتركيز');
+                recommendations.push('تهيئة بيئة تعلم خالية من المشتتات');
+                recommendations.push('استخدام المؤقتات البصرية لتحسين إدارة الوقت');
+            } else {
+                recommendations.push('صعوبات كبيرة في الانتباه والتركيز تحتاج إلى تقييم متخصص');
+                recommendations.push('اللجوء إلى طبيب نفسي أو مختص في اضطرابات الانتباه');
+                recommendations.push('استخدام استراتيجيات تعديل السلوك والتحفيز الإيجابي');
+            }
+            
+            // Display recommendations
+            recommendationsContainer.innerHTML = recommendations.map(rec => `
+                <div class="flex items-start">
+                    <div class="text-primary-red text-xl ml-2">•</div>
+                    <p class="text-gentle-gray font-amiri">${rec}</p>
+                </div>
+            `).join('');
+        }
+        
+        function resetQuestionnaire() {
+            currentQuestionnaireStep = 1;
+            questionnaireAnswers = {};
+            
+            // Reset all steps
+            for (let i = 1; i <= totalQuestionnaireSteps; i++) {
+                document.getElementById(`step-${i}`).classList.remove('active');
+            }
+            
+            // Activate first step
+            document.getElementById('step-1').classList.add('active');
+            
+            // Reset form inputs
+            document.getElementById('child-name').value = '';
+            document.getElementById('child-age').value = '';
+            document.getElementById('child-gender').value = '';
+            document.getElementById('child-school').value = '';
+            
+            // Reset option buttons
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Reset progress
+            updateQuestionnaireProgress();
+            
+            showNotification('تم إعادة تعيين الاستبيان', 'info');
+        }
+        
+        function saveResults() {
+            const childName = document.getElementById('child-name').value || 'الطفل';
+            showNotification(`تم حفظ نتائج تشخيص ${childName} بنجاح`, 'success');
+        }
+        
+        function shareResults() {
+            showNotification('جاري إعداد النتائج للمشاركة...', 'info');
+        }
+        
+        // Audio Diagnostic Functions
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audioElement = document.getElementById('recorded-audio');
+                    
+                    audioElement.src = audioUrl;
+                    document.getElementById('audio-player').classList.remove('hidden');
+                    
+                    // Start analysis
+                    analyzeAudio();
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                
+                // Update UI
+                document.getElementById('record-btn').classList.add('hidden');
+                document.getElementById('stop-btn').classList.remove('hidden');
+                document.getElementById('recording-status').innerHTML = '<p class="text-primary-red font-amiri">جارٍ التسجيل...</p>';
+                document.getElementById('audio-icon').textContent = '🔴';
+                
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                showNotification('تعذر الوصول إلى الميكروفون. يرجى التحقق من الإعدادات.', 'error');
+            }
+        }
+        
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                
+                // Update UI
+                document.getElementById('record-btn').classList.remove('hidden');
+                document.getElementById('stop-btn').classList.add('hidden');
+                document.getElementById('recording-status').innerHTML = '<p class="text-green-600 font-amiri">تم التسجيل بنجاح</p>';
+                document.getElementById('audio-icon').textContent = '✅';
+            }
+        }
+        
+        function analyzeAudio() {
+            // Show analysis progress
+            document.getElementById('analysis-progress').classList.remove('hidden');
+            
+            // Simulate analysis progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                document.getElementById('analysis-progress-bar').style.width = `${progress}%`;
+                document.getElementById('analysis-percent').textContent = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    displayAudioResults();
+                }
+            }, 200);
+        }
+        
+        function displayAudioResults() {
+            const resultsContainer = document.getElementById('audio-analysis-results');
+            
+            // Simulated analysis results
+            const analysisResults = [
+                { metric: 'طلاقة القراءة', score: 75, status: 'متوسط' },
+                { metric: 'وضوح النطق', score: 82, status: 'جيد' },
+                { metric: 'سرعة القراءة', score: 65, status: 'مقبول' },
+                { metric: 'التعبير الصوتي', score: 78, status: 'جيد' },
+                { metric: 'التنغيم', score: 70, status: 'متوسط' }
+            ];
+            
+            resultsContainer.innerHTML = analysisResults.map(result => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span class="text-deep-brown font-amiri">${result.metric}</span>
+                    <div class="flex items-center">
+                        <div class="w-20 h-2 bg-gray-200 rounded-full mr-2">
+                            <div class="h-2 bg-primary-red rounded-full" style="width: ${result.score}%"></div>
+                        </div>
+                        <span class="text-sm font-bold text-deep-brown">${result.score}%</span>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add recommendations
+            resultsContainer.innerHTML += `
+                <div class="mt-6 p-4 bg-soft-cream rounded-lg">
+                    <h6 class="font-bold text-deep-brown font-cairo mb-2">التوصيات:</h6>
+                    <ul class="list-disc list-inside text-gentle-gray font-amiri space-y-1">
+                        <li>ممارسة القراءة اليومية لتحسين الطلاقة</li>
+                        <li>التركيز على نطق الحروف الصعبة مثل (ق، غ، خ)</li>
+                        <li>استخدام التسجيلات الصوتية للمقارنة وتحسين الأداء</li>
+                    </ul>
+                </div>
+            `;
+            
+            showNotification('تم تحليل التسجيل الصوتي بنجاح', 'success');
+        }
+        
+        function resetAudioDiagnostic() {
+            document.getElementById('audio-player').classList.add('hidden');
+            document.getElementById('analysis-progress').classList.add('hidden');
+            document.getElementById('analysis-progress-bar').style.width = '0%';
+            document.getElementById('analysis-percent').textContent = '0%';
+            document.getElementById('recording-status').innerHTML = '<p class="text-gentle-gray font-amiri">انقر على "بدء التسجيل" لبدء تحليل النطق</p>';
+            document.getElementById('audio-icon').textContent = '🎤';
+            
+            // Reset results
+            document.getElementById('audio-analysis-results').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-5xl mb-4">🎯</div>
+                    <p class="text-gentle-gray font-amiri">سيتم عرض نتائج تحليل النطق هنا بعد التسجيل</p>
+                </div>
+            `;
+            
+            showNotification('تم إعادة تعيين التشخيص الصوتي', 'info');
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            anime({
+                targets: notification,
+                translateX: [-300, 0],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+            
+            // Remove after delay
+            setTimeout(() => {
+                anime({
+                    targets: notification,
+                    translateX: [0, -300],
+                    opacity: [1, 0],
+                    duration: 300,
+                    easing: 'easeInQuad',
+                    complete: () => notification.remove()
+                });
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
