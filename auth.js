@@ -297,6 +297,9 @@ function saveUserSession(username, userData) {
     
     localStorage.setItem('currentUser', JSON.stringify(sessionData));
     localStorage.setItem('selectedRole', userData.role);
+    
+    // حفظ في سجل المستخدمين الأخيرين
+    saveRecentUser(username);
 }
 
 /**
@@ -314,8 +317,60 @@ function logout() {
     if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
         localStorage.removeItem('currentUser');
         localStorage.removeItem('selectedRole');
+        localStorage.removeItem('recentUsers');
         window.location.href = 'login.html';
     }
+}
+
+/**
+ * التبديل السريع إلى حساب آخر (بدون تسجيل خروج)
+ */
+function quickSwitchAccount(username) {
+    const user = usersDatabase[username];
+    if (!user) {
+        alert('المستخدم غير موجود');
+        return;
+    }
+    
+    // حفظ الحساب الجديد
+    saveUserSession(username, user);
+    
+    // إعادة تحميل الصفحة مع الحساب الجديد
+    location.reload();
+}
+
+/**
+ * حفظ المستخدم الأخير (السجل)
+ */
+function saveRecentUser(username) {
+    let recentUsers = JSON.parse(localStorage.getItem('recentUsers') || '[]');
+    
+    // إزالة المستخدم إذا كان موجوداً بالفعل
+    recentUsers = recentUsers.filter(u => u !== username);
+    
+    // إضافة المستخدم في البداية
+    recentUsers.unshift(username);
+    
+    // الحفاظ على آخر 5 مستخدمين فقط
+    recentUsers = recentUsers.slice(0, 5);
+    
+    localStorage.setItem('recentUsers', JSON.stringify(recentUsers));
+}
+
+/**
+ * الحصول على المستخدمين الأخيرين
+ */
+function getRecentUsers() {
+    const recentUsers = JSON.parse(localStorage.getItem('recentUsers') || '[]');
+    return recentUsers
+        .map(username => usersDatabase[username])
+        .filter(user => user !== undefined)
+        .map((user, username) => ({
+            username: Object.keys(usersDatabase).find(key => usersDatabase[key] === user),
+            name: user.name,
+            role: user.role,
+            photo: user.photo
+        }));
 }
 
 /**
