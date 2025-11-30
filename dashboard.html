@@ -154,6 +154,10 @@
                             <a href="#" onclick="goToSettings(event)" class="block px-4 py-2 text-deep-brown hover:bg-soft-cream transition-colors text-sm">
                                 ⚙️ الإعدادات
                             </a>
+                            
+                            <!-- Recent Users / Quick Switch Section -->
+                            <div id="recent-users-menu" class="border-t border-gray-200"></div>
+                            
                             <a href="#" onclick="logout(event)" class="block px-4 py-2 text-red-600 hover:bg-soft-cream transition-colors text-sm border-t border-gray-200">
                                 🚪 تسجيل الخروج
                             </a>
@@ -318,6 +322,7 @@
             setupSidebar();
             setupMobileMenu();
             loadDashboardContent();
+            displayRecentUsersInMenu(); // عرض قائمة التبديل السريع
         });
         
         function setupMobileMenu() {
@@ -403,6 +408,29 @@
                 profileMenu.classList.add('hidden');
             }
         });
+        
+        // عرض قائمة التبديل السريع للحسابات الأخيرة
+        function displayRecentUsersInMenu() {
+            const recentUsersMenu = document.getElementById('recent-users-menu');
+            const recentUsers = getRecentUsers();
+            const currentUser = getCurrentUser();
+            
+            if (recentUsers && recentUsers.length > 1) { // أكثر من مستخدم واحد
+                let html = '<div class="px-2 py-2">';
+                html += '<p class="text-xs text-gentle-gray font-medium px-2 py-1">تبديل الحساب</p>';
+                
+                recentUsers.forEach(user => {
+                    if (user.username !== currentUser.username) { // لا نعرض الحساب الحالي
+                        html += `<button onclick="quickSwitchAccount('${user.username}')" class="w-full text-right px-3 py-2 text-sm text-deep-brown hover:bg-soft-cream transition-colors rounded block">`;
+                        html += `${user.name} <span class="text-xs text-gentle-gray">(${user.role})</span>`;
+                        html += `</button>`;
+                    }
+                });
+                
+                html += '</div>';
+                recentUsersMenu.innerHTML = html;
+            }
+        }
         
         function goToSettings(e) {
             e.preventDefault();
