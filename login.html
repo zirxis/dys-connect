@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - DYS-CONNECT</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-red': '#C41E3A',
+                        'secondary-red': '#E85A4F',
+                        'accent-orange': '#F28B30',
+                        'warm-beige': '#F5F1E8',
+                        'deep-brown': '#8B4513',
+                        'soft-cream': '#FDF6E3',
+                        'muted-gold': '#D4AF37',
+                        'gentle-gray': '#6C757D'
+                    },
+                    fontFamily: {
+                        'cairo': ['Cairo', 'sans-serif'],
+                        'amiri': ['Amiri', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Amiri', serif;
+            background: linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(232, 90, 79, 0.1) 100%);
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(196, 30, 58, 0.15);
+            max-width: 450px;
+            width: 100%;
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .input-group {
+            margin-bottom: 24px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #8B4513;
+            font-size: 15px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E5E5E5;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: 'Amiri', serif;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #C41E3A;
+            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            background: linear-gradient(135deg, #A01729 0%, #D64541 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.3);
+        }
+        
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        
+        .error-message {
+            color: #DC3545;
+            font-size: 14px;
+            margin-bottom: 12px;
+            padding: 10px;
+            background-color: rgba(220, 53, 69, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+            animation: shake 0.4s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .demo-credentials {
+            background-color: #FDF6E3;
+            padding: 16px;
+            border-radius: 10px;
+            margin-top: 24px;
+            border-right: 4px solid #F28B30;
+        }
+        
+        .demo-credentials h3 {
+            color: #8B4513;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        .demo-account {
+            font-size: 13px;
+            color: #6C757D;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .demo-account:hover {
+            background-color: #f0f0f0;
+            transform: translateX(-4px);
+        }
+        
+        .demo-account strong {
+            color: #C41E3A;
+        }
+        
+        .logo-section {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .logo-section h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #C41E3A;
+            margin-bottom: 8px;
+        }
+        
+        .logo-section p {
+            color: #6C757D;
+            font-size: 14px;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .btn-login.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: not-allowed;
+        }
+        
+        .btn-login.loading .loading-spinner {
+            display: inline-block;
+        }
+        
+        .back-to-home {
+            text-align: center;
+            margin-top: 24px;
+        }
+        
+        .back-to-home a {
+            color: #C41E3A;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home a:hover {
+            color: #E85A4F;
+        }
+    </style>
+</head>
+<body class="bg-warm-beige">
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <h1>DYS-CONNECT</h1>
+                <p>منصة التكفل الذكي والمبكر بالأطفال</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <!-- Error Message -->
+                <div id="error-message" class="error-message"></div>
+                
+                <!-- Username Input -->
+                <div class="input-group">
+                    <label for="username">اسم المستخدم</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="أدخل اسم المستخدم"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+                
+                <!-- Password Input -->
+                <div class="input-group">
+                    <label for="password">كلمة المرور</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="أدخل كلمة المرور"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+                
+                <!-- Login Button -->
+                <button type="submit" class="btn-login" id="login-btn">
+                    <span class="loading-spinner"></span>
+                    <span id="btn-text">تسجيل الدخول</span>
+                </button>
+            </form>
+            
+            <!-- Demo Credentials Section -->
+            <div class="demo-credentials">
+                <h3>🔐 حسابات تجريبية جاهزة:</h3>
+                
+                <!-- Mother Accounts -->
+                <div style="margin-bottom: 12px;">
+                    <p style="font-size: 12px; color: #C41E3A; font-weight: 600; margin-bottom: 6px;">👩‍👦 حسابات الأمهات:</p>
+                    <div class="demo-account" onclick="fillCredentials('fatima_01', 'pass123')">
+                        <strong>fatima_01</strong> - pass123
+                    </div>
+                    <div class="demo-account" onclick="fillCredentials('layla_02', 'pass123')">
+                        <strong>layla_02</strong> - pass123
+                    </div>
+                    <div class="demo-account" onclick="fillCredentials('aisha_03', 'pass123')">
+                        <strong>aisha_03</strong> - pass123
+                    </div>
+                </div>
+                
+                <!-- Teacher Accounts -->
+                <div style="margin-bottom: 12px;">
+                    <p style="font-size: 12px; color: #C41E3A; font-weight: 600; margin-bottom: 6px;">🧑‍🏫 حسابات المعلمين:</p>
+                    <div class="demo-account" onclick="fillCredentials('ahmed_teacher', 'pass123')">
+                        <strong>ahmed_teacher</strong> - pass123
+                    </div>
+                    <div class="demo-account" onclick="fillCredentials('sara_teacher', 'pass123')">
+                        <strong>sara_teacher</strong> - pass123
+                    </div>
+                    <div class="demo-account" onclick="fillCredentials('mohsen_teacher', 'pass123')">
+                        <strong>mohsen_teacher</strong> - pass123
+                    </div>
+                </div>
+                
+                <!-- Specialist Accounts -->
+                <div style="margin-bottom: 12px;">
+                    <p style="font-size: 12px; color: #C41E3A; font-weight: 600; margin-bottom: 6px;">🧠 حسابات المختصين:</p>
+                    <div class="demo-account" onclick="fillCredentials('dr_amina', 'pass123')">
+                        <strong>dr_amina</strong> - pass123
+                    </div>
+                    <div class="demo-account" onclick="fillCredentials('dr_karim', 'pass123')">
+                        <strong>dr_karim</strong> - pass123
+                    </div>
+                    <div class="demo-account" onclick="fillCredentials('dr_huda', 'pass123')">
+                        <strong>dr_huda</strong> - pass123
+                    </div>
+                </div>
+                
+                <!-- Institution Accounts -->
+                <div style="margin-bottom: 12px;">
+                    <p style="font-size: 12px; color: #C41E3A; font-weight: 600; margin-bottom: 6px;">🏫 حسابات المؤسسات:</p>
+                    <div class="demo-account" onclick="fillCredentials('school_algiers', 'pass123')">
+                        <strong>school_algiers</strong> - pass123
+                    </div>
+                    <div class="demo-account" onclick="fillCredentials('school_oran', 'pass123')">
+                        <strong>school_oran</strong> - pass123
+                    </div>
+                    <div class="demo-account" onclick="fillCredentials('school_constantine', 'pass123')">
+                        <strong>school_constantine</strong> - pass123
+                    </div>
+                </div>
+                
+                <!-- Researcher Accounts -->
+                <div>
+                    <p style="font-size: 12px; color: #C41E3A; font-weight: 600; margin-bottom: 6px;">🎓 حسابات الباحثين:</p>
+                    <div class="demo-account" onclick="fillCredentials('dr_youssef', 'pass123')">
+                        <strong>dr_youssef</strong> - pass123
+                    </div>
+                    <div class="demo-account" onclick="fillCredentials('prof_fatima', 'pass123')">
+                        <strong>prof_fatima</strong> - pass123
+                    </div>
+                    <div class="demo-account" onclick="fillCredentials('prof_ali', 'pass123')">
+                        <strong>prof_ali</strong> - pass123
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Back to Home Link -->
+            <div class="back-to-home">
+                <a href="index.html">← العودة للصفحة الرئيسية</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+</body>
+</html>

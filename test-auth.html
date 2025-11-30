@@ -1,0 +1,247 @@
+<!-- ملف اختبار نظام المصادقة - Test Authentication System -->
+<!-- يمكنك فتح هذا الملف في المتصفح لاختبار النظام مباشرة -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار نظام المصادقة - DYS-CONNECT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Amiri', serif; }
+        .test-section { border: 2px solid #C41E3A; padding: 20px; margin: 20px 0; border-radius: 10px; }
+        .test-pass { background-color: #d4edda; border-color: #28a745; }
+        .test-fail { background-color: #f8d7da; border-color: #dc3545; }
+        code { background-color: #f5f1e8; padding: 5px 10px; border-radius: 5px; }
+    </style>
+</head>
+<body class="bg-warm-beige p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-bold text-primary-red mb-8 text-center">🧪 اختبار نظام المصادقة</h1>
+        
+        <!-- Test 1: Check Auth System -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">✅ اختبار 1: التحقق من نظام المصادقة</h2>
+            <p>هل يتم تحميل ملف <code>auth.js</code> بشكل صحيح؟</p>
+            <button onclick="testAuthLoaded()" class="bg-primary-red text-white px-4 py-2 rounded-lg mt-4">اختبر</button>
+            <div id="test-1-result" class="mt-4"></div>
+        </div>
+        
+        <!-- Test 2: Check Login Credentials -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">✅ اختبار 2: التحقق من الحسابات</h2>
+            <p>هل جميع الحسابات التجريبية موجودة؟</p>
+            <button onclick="testAllCredentials()" class="bg-primary-red text-white px-4 py-2 rounded-lg mt-4">اختبر</button>
+            <div id="test-2-result" class="mt-4"></div>
+        </div>
+        
+        <!-- Test 3: Check Connections -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">✅ اختبار 3: التحقق من الروابط بين الأدوار</h2>
+            <p>هل نظام الربط يعمل بشكل صحيح؟</p>
+            <button onclick="testConnections()" class="bg-primary-red text-white px-4 py-2 rounded-lg mt-4">اختبر</button>
+            <div id="test-3-result" class="mt-4"></div>
+        </div>
+        
+        <!-- Test 4: Test Login Function -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">✅ اختبار 4: اختبار عملية تسجيل الدخول</h2>
+            <p>جرب تسجيل الدخول برسائل خطأ محتملة</p>
+            <div class="space-y-4 mt-4">
+                <button onclick="testLoginFail()" class="bg-secondary-red text-white px-4 py-2 rounded-lg">اختبر كلمة مرور خاطئة</button>
+                <button onclick="testLoginSuccess()" class="bg-green-500 text-white px-4 py-2 rounded-lg">اختبر تسجيل دخول صحيح</button>
+            </div>
+            <div id="test-4-result" class="mt-4"></div>
+        </div>
+        
+        <!-- Test 5: Check Connected Users -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">✅ اختبار 5: الحصول على المستخدمين المرتبطين</h2>
+            <p>اختبر الحصول على المستخدمين المرتبطين لكل دور</p>
+            <button onclick="testConnectedUsers()" class="bg-primary-red text-white px-4 py-2 rounded-lg mt-4">اختبر</button>
+            <div id="test-5-result" class="mt-4 max-h-96 overflow-y-auto"></div>
+        </div>
+        
+        <!-- Test 6: Search Users -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">✅ اختبار 6: البحث عن مستخدمين</h2>
+            <p>اختبر وظيفة البحث</p>
+            <div class="mt-4">
+                <input type="text" id="search-input" placeholder="ابحث عن اسم مستخدم..." class="border-2 border-primary-red px-4 py-2 rounded-lg w-full">
+                <button onclick="testSearch()" class="bg-primary-red text-white px-4 py-2 rounded-lg mt-2">بحث</button>
+            </div>
+            <div id="test-6-result" class="mt-4"></div>
+        </div>
+        
+        <!-- Test 7: LocalStorage -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">✅ اختبار 7: اختبار localStorage</h2>
+            <p>التحقق من حفظ البيانات</p>
+            <button onclick="testLocalStorage()" class="bg-primary-red text-white px-4 py-2 rounded-lg mt-4">اختبر</button>
+            <button onclick="clearLocalStorage()" class="bg-secondary-red text-white px-4 py-2 rounded-lg mt-4 mr-2">امسح البيانات</button>
+            <div id="test-7-result" class="mt-4"></div>
+        </div>
+        
+        <!-- Test 8: Role Info -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">✅ اختبار 8: معلومات الأدوار</h2>
+            <p>عرض معلومات جميع الأدوار</p>
+            <button onclick="testRoleInfo()" class="bg-primary-red text-white px-4 py-2 rounded-lg mt-4">اختبر</button>
+            <div id="test-8-result" class="mt-4"></div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="test-section bg-soft-cream mt-8 text-center">
+            <h2 class="text-2xl font-bold mb-4">🔗 روابط سريعة</h2>
+            <div class="space-y-2">
+                <p><a href="login.html" class="text-primary-red font-bold hover:underline">➜ الذهاب إلى صفحة تسجيل الدخول</a></p>
+                <p><a href="index.html" class="text-primary-red font-bold hover:underline">➜ العودة للصفحة الرئيسية</a></p>
+                <p><a href="dashboard.html" class="text-primary-red font-bold hover:underline">➜ الذهاب إلى لوحة التحكم (يتطلب تسجيل دخول)</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        // Test 1: Check if auth.js is loaded
+        function testAuthLoaded() {
+            const result = document.getElementById('test-1-result');
+            if (typeof usersDatabase !== 'undefined' && typeof roleConnections !== 'undefined') {
+                result.innerHTML = `<div class="test-pass p-4 rounded-lg"><strong>✅ نجح!</strong> تم تحميل نظام المصادقة بشكل صحيح</div>`;
+            } else {
+                result.innerHTML = `<div class="test-fail p-4 rounded-lg"><strong>❌ فشل!</strong> لم يتم تحميل ملف auth.js</div>`;
+            }
+        }
+
+        // Test 2: Check all credentials
+        function testAllCredentials() {
+            const result = document.getElementById('test-2-result');
+            const roles = ['mother', 'teacher', 'specialist', 'institution', 'researcher'];
+            let html = '<div class="test-pass p-4 rounded-lg">';
+            
+            let total = 0;
+            roles.forEach(role => {
+                const usersInRole = Object.entries(usersDatabase).filter(([_, user]) => user.role === role);
+                html += `<p><strong>${role}:</strong> ${usersInRole.length} حسابات</p>`;
+                total += usersInRole.length;
+            });
+            
+            html += `<p><strong>المجموع:</strong> ${total} حساب</p>`;
+            html += '</div>';
+            result.innerHTML = html;
+        }
+
+        // Test 3: Check connections
+        function testConnections() {
+            const result = document.getElementById('test-3-result');
+            let html = '<div class="test-pass p-4 rounded-lg">';
+            
+            for (const [role, connections] of Object.entries(roleConnections)) {
+                html += `<p><strong>${role}:</strong> يمكنه الوصول إلى ${connections.join(', ')}</p>`;
+            }
+            
+            html += '</div>';
+            result.innerHTML = html;
+        }
+
+        // Test 4: Test login fail/success
+        function testLoginFail() {
+            const result = document.getElementById('test-4-result');
+            const user = usersDatabase['fatima_01'];
+            
+            if (user && user.password !== 'wrongpassword') {
+                result.innerHTML = `<div class="test-pass p-4 rounded-lg"><strong>✅ صحيح!</strong> سيرفع رسالة خطأ عند إدخال كلمة مرور خاطئة</div>`;
+            }
+        }
+
+        function testLoginSuccess() {
+            const result = document.getElementById('test-4-result');
+            const user = usersDatabase['fatima_01'];
+            
+            if (user && user.password === 'pass123') {
+                result.innerHTML = `<div class="test-pass p-4 rounded-lg"><strong>✅ صحيح!</strong> يمكن تسجيل الدخول بـ fatima_01 / pass123</div>`;
+            }
+        }
+
+        // Test 5: Connected users
+        function testConnectedUsers() {
+            const result = document.getElementById('test-5-result');
+            let html = '<div class="test-pass p-4 rounded-lg">';
+            
+            const roles = ['mother', 'teacher', 'specialist'];
+            roles.forEach(role => {
+                const connectedUsers = getConnectedUsers(role);
+                html += `<p><strong>${role} (${connectedUsers.length}):</strong></p>`;
+                html += '<ul style="margin-right: 20px; list-style: circle;">';
+                connectedUsers.forEach(user => {
+                    html += `<li>${user.name} (${user.role})</li>`;
+                });
+                html += '</ul>';
+            });
+            
+            html += '</div>';
+            result.innerHTML = html;
+        }
+
+        // Test 6: Search users
+        function testSearch() {
+            const query = document.getElementById('search-input').value;
+            const result = document.getElementById('test-6-result');
+            
+            const searchResults = searchUsers(query, false);
+            
+            if (searchResults.length > 0) {
+                let html = `<div class="test-pass p-4 rounded-lg"><strong>✅ وجدنا ${searchResults.length} نتيجة:</strong><ul style="margin-right: 20px; list-style: circle;">`;
+                searchResults.forEach(user => {
+                    html += `<li>${user.name} (${user.role}) - ${user.email}</li>`;
+                });
+                html += '</ul></div>';
+                result.innerHTML = html;
+            } else {
+                result.innerHTML = `<div class="test-fail p-4 rounded-lg"><strong>❌ لم نجد نتائج</strong></div>`;
+            }
+        }
+
+        // Test 7: LocalStorage
+        function testLocalStorage() {
+            const result = document.getElementById('test-7-result');
+            const user = usersDatabase['fatima_01'];
+            
+            saveUserSession('fatima_01', user);
+            const saved = getCurrentUser();
+            
+            if (saved && saved.username === 'fatima_01') {
+                result.innerHTML = `<div class="test-pass p-4 rounded-lg">
+                    <strong>✅ نجح!</strong>
+                    <p>تم حفظ: ${saved.name}</p>
+                    <p>الدور: ${saved.role}</p>
+                </div>`;
+            } else {
+                result.innerHTML = `<div class="test-fail p-4 rounded-lg"><strong>❌ فشل الحفظ</strong></div>`;
+            }
+        }
+
+        function clearLocalStorage() {
+            localStorage.removeItem('currentUser');
+            document.getElementById('test-7-result').innerHTML = `<div class="test-pass p-4 rounded-lg"><strong>✅ تم مسح البيانات</strong></div>`;
+        }
+
+        // Test 8: Role info
+        function testRoleInfo() {
+            const result = document.getElementById('test-8-result');
+            let html = '<div class="test-pass p-4 rounded-lg">';
+            
+            const roles = ['mother', 'teacher', 'specialist', 'institution', 'researcher'];
+            roles.forEach(role => {
+                const info = getRoleInfo(role);
+                if (info) {
+                    html += `<p><strong>${info.icon} ${info.label}:</strong> ${info.description}</p>`;
+                }
+            });
+            
+            html += '</div>';
+            result.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

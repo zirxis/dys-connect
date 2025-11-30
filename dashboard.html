@@ -138,12 +138,26 @@
                     
                     <!-- User Profile -->
                     <div class="relative">
-                        <button id="profile-btn" class="flex items-center space-x-2 text-deep-brown hover:text-primary-red">
+                        <button id="profile-btn" class="flex items-center space-x-2 text-deep-brown hover:text-primary-red" onclick="toggleProfileMenu()">
                             <div class="w-8 h-8 bg-primary-red rounded-full flex items-center justify-center text-white text-sm font-bold">
                                 <span id="user-initial">أ</span>
                             </div>
                             <span id="user-name" class="hidden md:block font-medium"></span>
                         </button>
+                        
+                        <!-- Profile Dropdown Menu -->
+                        <div id="profile-menu" class="hidden absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg z-50 min-w-48">
+                            <div class="p-4 border-b border-gray-200">
+                                <p class="text-sm text-gentle-gray" id="profile-role"></p>
+                                <p class="font-medium text-deep-brown" id="profile-email"></p>
+                            </div>
+                            <a href="#" onclick="goToSettings(event)" class="block px-4 py-2 text-deep-brown hover:bg-soft-cream transition-colors text-sm">
+                                ⚙️ الإعدادات
+                            </a>
+                            <a href="#" onclick="logout(event)" class="block px-4 py-2 text-red-600 hover:bg-soft-cream transition-colors text-sm border-t border-gray-200">
+                                🚪 تسجيل الخروج
+                            </a>
+                        </div>
                     </div>
                     
                     <!-- Mobile Menu Button -->
@@ -285,12 +299,21 @@
         </div>
     </footer>
 
+    <script src="auth.js"></script>
     <script>
-        // Dashboard functionality
+        // Dashboard functionality - Updated with Authentication
         let selectedRole = '';
+        let currentUser = null;
         
         document.addEventListener('DOMContentLoaded', function() {
-            selectedRole = localStorage.getItem('selectedRole') || 'mother';
+            // Check authentication first
+            if (!checkAuthentication()) {
+                return;
+            }
+            
+            currentUser = getCurrentUser();
+            selectedRole = currentUser.role;
+            
             initializeDashboard();
             setupSidebar();
             setupMobileMenu();
@@ -329,20 +352,28 @@
             const sidebarRoleIcon = document.getElementById('sidebar-role-icon');
             const sidebarRoleTitle = document.getElementById('sidebar-role-title');
             
-            const roleData = {
-                mother: { initial: 'أ', name: 'فاطمة الزهراء', icon: '👩‍👦', title: 'أم' },
-                teacher: { initial: 'م', name: 'أحمد محمد', icon: '🧑‍🏫', title: 'معلم' },
-                specialist: { initial: 'د', name: 'د. سعيدة', icon: '🧠', title: 'مختص' },
-                institution: { initial: 'م', name: 'مدرسة ابن خلدون', icon: '🏫', title: 'مؤسسة' },
-                researcher: { initial: 'ب', name: 'د. يوسف', icon: '🎓', title: 'باحث' }
+            // Update profile dropdown
+            const profileRole = document.getElementById('profile-role');
+            const profileEmail = document.getElementById('profile-email');
+            
+            if (userInitial) userInitial.textContent = currentUser.name.charAt(0);
+            if (userName) userName.textContent = currentUser.name;
+            if (sidebarRoleIcon) sidebarRoleIcon.textContent = currentUser.photo;
+            if (sidebarRoleTitle) sidebarRoleTitle.textContent = getRoleLabel(currentUser.role);
+            
+            if (profileRole) profileRole.textContent = getRoleLabel(currentUser.role);
+            if (profileEmail) profileEmail.textContent = currentUser.email;
+        }
+        
+        function getRoleLabel(role) {
+            const labels = {
+                mother: 'أم',
+                teacher: 'معلم',
+                specialist: 'مختص',
+                institution: 'مؤسسة',
+                researcher: 'باحث'
             };
-            
-            const userData = roleData[selectedRole] || roleData.mother;
-            
-            if (userInitial) userInitial.textContent = userData.initial;
-            if (userName) userName.textContent = userData.name;
-            if (sidebarRoleIcon) sidebarRoleIcon.textContent = userData.icon;
-            if (sidebarRoleTitle) sidebarRoleTitle.textContent = userData.title;
+            return labels[role] || role;
         }
         
         function setupSidebar() {
@@ -356,16 +387,35 @@
             }
         }
         
-        function setupMobileMenu() {
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', function(e) {
-                const sidebar = document.getElementById('sidebar');
-                const sidebarToggle = document.getElementById('sidebar-toggle');
-                
-                if (window.innerWidth < 768 && sidebar && !sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
-                    sidebar.classList.add('hidden');
-                }
-            });
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profile-menu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+        
+        // Close profile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const profileBtn = document.getElementById('profile-btn');
+            const profileMenu = document.getElementById('profile-menu');
+            
+            if (profileMenu && !profileMenu.contains(e.target) && !profileBtn.contains(e.target)) {
+                profileMenu.classList.add('hidden');
+            }
+        });
+        
+        function goToSettings(e) {
+            e.preventDefault();
+            window.location.href = 'settings.html';
+        }
+        
+        function logout(e) {
+            e.preventDefault();
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('selectedRole');
+                window.location.href = 'login.html';
+            }
         }
         
         function loadDashboardContent() {
@@ -373,7 +423,7 @@
             const roleContent = getRoleSpecificContent(selectedRole);
             
             if (content) {
-                content.innerHTML = roleContent;
+                content.innerHTML = roleContent + getConnectedUsersSection();
                 initializeRoleFeatures();
             }
         }
@@ -392,6 +442,291 @@
         
         function getMotherDashboard() {
             return `
+                <!-- Mother Dashboard -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Smart Tools -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl p-6 shadow-lg">
+                            <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">الأدوات الذكية</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <button onclick="goToSmartTools('summary')" class="tool-card p-4 rounded-lg hover:shadow-lg transition-all">
+                                    <div class="text-3xl mb-2">📝</div>
+                                    <h3 class="font-bold text-deep-brown font-cairo mb-1">تلخيص ذكي</h3>
+                                    <p class="text-sm text-gentle-gray font-amiri">تلخيص النصوص والملاحظات</p>
+                                </button>
+                                
+                                <button onclick="goToSmartTools('mindmap')" class="tool-card p-4 rounded-lg hover:shadow-lg transition-all">
+                                    <div class="text-3xl mb-2">🧠</div>
+                                    <h3 class="font-bold text-deep-brown font-cairo mb-1">خريطة ذهنية</h3>
+                                    <p class="text-sm text-gentle-gray font-amiri">تنظيم الأفكار والمعلومات</p>
+                                </button>
+                                
+                                <button onclick="goToSmartTools('exercises')" class="tool-card p-4 rounded-lg hover:shadow-lg transition-all">
+                                    <div class="text-3xl mb-2">🎮</div>
+                                    <h3 class="font-bold text-deep-brown font-cairo mb-1">تمارين تفاعلية</h3>
+                                    <p class="text-sm text-gentle-gray font-amiri">مناشط تعليمية مرحة</p>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getTeacherDashboard() {
+            return `
+                <!-- Teacher Dashboard -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Questionnaire Management -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl p-6 shadow-lg">
+                            <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">إدارة الاستبيانات</h2>
+                            <button onclick="createQuestionnaire()" class="w-full text-right p-4 bg-soft-cream rounded-lg hover:bg-gray-100 transition-colors">
+                                <p class="font-bold text-deep-brown font-cairo">+ إنشاء استبيان جديد</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getSpecialistDashboard() {
+            return `
+                <!-- Specialist Dashboard -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Cases Management -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl p-6 shadow-lg">
+                            <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">إدارة الحالات</h2>
+                            <button onclick="addNewCase()" class="w-full text-right p-4 bg-soft-cream rounded-lg hover:bg-gray-100 transition-colors">
+                                <p class="font-bold text-deep-brown font-cairo">+ حالة جديدة</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getInstitutionDashboard() {
+            return `
+                <!-- Institution Dashboard -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Team Management -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl p-6 shadow-lg">
+                            <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">إدارة الفريق</h2>
+                            <button onclick="inviteMember()" class="w-full text-right p-4 bg-soft-cream rounded-lg hover:bg-gray-100 transition-colors">
+                                <p class="font-bold text-deep-brown font-cairo">+ دعوة عضو جديد</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getResearcherDashboard() {
+            return `
+                <!-- Researcher Dashboard -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Research Requests -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl p-6 shadow-lg">
+                            <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">طلبات البحث</h2>
+                            <button onclick="createResearchRequest()" class="w-full text-right p-4 bg-soft-cream rounded-lg hover:bg-gray-100 transition-colors">
+                                <p class="font-bold text-deep-brown font-cairo">+ طلب بحث جديد</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getConnectedUsersSection() {
+            const connectedUsers = getConnectedUsers(selectedRole);
+            
+            if (!connectedUsers || connectedUsers.length === 0) {
+                return '';
+            }
+            
+            const roleInfo = {
+                mother: 'المختصون والباحثون والمعلمون',
+                teacher: 'الأمهات والمختصون والباحثون والمؤسسات',
+                specialist: 'الأمهات والمعلمون والباحثون والمؤسسات',
+                institution: 'المعلمون والمختصون والباحثون',
+                researcher: 'الأمهات والمعلمون والمختصون والمؤسسات'
+            };
+            
+            return `
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <h2 class="text-2xl font-bold text-deep-brown font-cairo mb-6">المستخدمون المرتبطون 🤝</h2>
+                    <p class="text-sm text-gentle-gray font-amiri mb-6">يمكنك التواصل مع ${roleInfo[selectedRole] || 'المستخدمين'}</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${connectedUsers.map(user => `
+                            <div class="card-hover bg-soft-cream rounded-lg p-6 text-center hover:shadow-lg transition-all">
+                                <div class="text-4xl mb-3">${user.photo}</div>
+                                <h3 class="font-bold text-deep-brown font-cairo mb-1">${user.name}</h3>
+                                <p class="text-sm text-gentle-gray font-amiri mb-2">${getRoleLabel(user.role)}</p>
+                                <p class="text-xs text-gentle-gray mb-4">${user.email}</p>
+                                <button onclick="contactUser('${user.username}')" class="w-full btn-primary text-white py-2 rounded-lg text-sm">
+                                    تواصل
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function contactUser(username) {
+            const user = getUserInfo(username);
+            if (user) {
+                showNotification(`سيتم نقلك للتواصل مع ${user.name}...`, 'info');
+                setTimeout(() => {
+                    window.location.href = `messages.html?contact=${username}`;
+                }, 1500);
+            }
+        }
+        
+        function initializeRoleFeatures() {
+            // Initialize charts based on role
+            if (selectedRole === 'teacher') {
+                initializeStudentsChart();
+            } else if (selectedRole === 'institution') {
+                initializeInstitutionChart();
+            }
+        }
+        
+        function initializeStudentsChart() {
+            const chartElement = document.getElementById('students-chart');
+            if (chartElement && typeof echarts !== 'undefined') {
+                const chart = echarts.init(chartElement);
+                
+                const option = {
+                    title: {
+                        text: 'توزيع التلاميذ',
+                        textStyle: { fontSize: 12, color: '#8B4513' }
+                    },
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    series: [{
+                        type: 'pie',
+                        radius: '50%',
+                        data: [
+                            { value: 8, name: 'طبيعي', itemStyle: { color: '#28A745' } },
+                            { value: 2, name: 'يحتاج متابعة', itemStyle: { color: '#FFC107' } },
+                            { value: 1, name: 'يحتاج تدخل', itemStyle: { color: '#DC3545' } }
+                        ],
+                        emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } }
+                    }]
+                };
+                
+                chart.setOption(option);
+            }
+        }
+        
+        function initializeInstitutionChart() {
+            const chartElement = document.getElementById('institution-chart');
+            if (chartElement && typeof echarts !== 'undefined') {
+                const chart = echarts.init(chartElement);
+                
+                const option = {
+                    title: {
+                        text: 'النشاط الشهري',
+                        textStyle: { fontSize: 12, color: '#8B4513' }
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو']
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: [12, 15, 18, 22, 25, 28],
+                        type: 'line',
+                        smooth: true,
+                        itemStyle: { color: '#C41E3A' },
+                        areaStyle: { color: 'rgba(196, 30, 58, 0.1)' }
+                    }]
+                };
+                
+                chart.setOption(option);
+            }
+        }
+        
+        // Interactive functions
+        function openTool(toolType) {
+            showNotification(`فتح أداة ${toolType}...`, 'info');
+        }
+        
+        function goToSmartTools(toolType) {
+            window.location.href = `smart-tools.html?tool=${toolType}`;
+        }
+        
+        function createQuestionnaire() {
+            showNotification('جاري فتح منشئ الاستبيانات...', 'info');
+        }
+        
+        function addNewCase() {
+            showNotification('جاري فتح نموذج إضافة حالة...', 'info');
+        }
+        
+        function generateReport() {
+            showNotification('جاري إنشاء التقرير...', 'info');
+        }
+        
+        function inviteMember() {
+            showNotification('جاري فتح نموذج دعوة عضو...', 'info');
+        }
+        
+        function sendNotification() {
+            showNotification('جاري فتح نموذج إرسال إشعار...', 'info');
+        }
+        
+        function createResearchRequest() {
+            showNotification('جاري فتح نموذج طلب بحث...', 'info');
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            anime({
+                targets: notification,
+                translateX: [-300, 0],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+            
+            // Remove after delay
+            setTimeout(() => {
+                anime({
+                    targets: notification,
+                    translateX: [0, -300],
+                    opacity: [1, 0],
+                    duration: 300,
+                    easing: 'easeInQuad',
+                    complete: () => notification.remove()
+                });
+            }, 3000);
+        }
+        
+    </script>
+      
                 <!-- Mother Dashboard -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                     <!-- Smart Tools -->
@@ -691,7 +1026,7 @@
                             <div class="p-3 bg-soft-cream rounded-lg">
                                 <div class="flex justify-between items-center">
                                     <div>
-                                        <h4 class="font-bold text-deep-brown font-cairo text-sm">فاطمة الزهراء</h4>
+                                        <h4 class="font-bold text-deep-brown font-cairo text-sm"></h4>
                                         <p class="text-xs text-gentle-gray font-amiri">بعد غد - 2:00 مساءً</p>
                                     </div>
                                     <span class="text-xs bg-accent-orange text-white px-2 py-1 rounded-full">جلسة علاج</span>

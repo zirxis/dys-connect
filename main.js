@@ -148,7 +148,7 @@ function animateCounter(element, target) {
 
 // Role selection functionality
 function initializeRoleSelection() {
-    // Store selected role in localStorage
+    // Store selected role in localStorage and redirect to login
     window.selectRole = function(role) {
         localStorage.setItem('selectedRole', role);
         
@@ -160,13 +160,17 @@ function initializeRoleSelection() {
         });
         
         // Highlight selected card
-        event.target.closest('.card-hover').style.transform = 'scale(1.05)';
-        event.target.closest('.card-hover').style.opacity = '1';
-        event.target.closest('.card-hover').style.border = '3px solid #C41E3A';
+        const button = event.target;
+        const card = button.closest('.card-hover');
+        if (card) {
+            card.style.transform = 'scale(1.05)';
+            card.style.opacity = '1';
+            card.style.border = '3px solid #C41E3A';
+        }
         
-        // Navigate to registration after animation
+        // Navigate to login page after animation
         setTimeout(() => {
-            window.location.href = 'register.html';
+            window.location.href = 'login.html';
         }, 800);
     };
 }
