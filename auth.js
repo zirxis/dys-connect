@@ -261,11 +261,13 @@ function handleLogin(event) {
             loginBtn.classList.remove('loading');
             btnText.textContent = 'تسجيل الدخول';
             loginBtn.disabled = false;
+            logLoginAttempt(username, user.role, false); // تسجيل محاولة فاشلة
             return;
         }
         
         // تسجيل الدخول ناجح
         saveUserSession(username, user);
+        logLoginAttempt(username, user.role, true); // تسجيل تسجيل دخول ناجح
         
         // إضافة تأثير نجاح
         anime({
@@ -575,6 +577,64 @@ function getRoleInfo(role) {
 
 // =====================================================
 // تهيئة الصفحة
+// =====================================================
+// نظام حفظ بيانات التسجيل والسجلات
+// =====================================================
+
+function logLoginAttempt(username, role, success) {
+    const timestamp = new Date();
+    const logEntry = {
+        username: username,
+        role: role,
+        success: success,
+        timestamp: timestamp.toISOString(),
+        date: timestamp.toLocaleDateString('ar-DZ'),
+        time: timestamp.toLocaleTimeString('ar-DZ'),
+        ip: 'local' // في بيئة حقيقية، سيتم الحصول على IP من الخادم
+    };
+    
+    // الحصول على السجلات الموجودة
+    let loginLogs = JSON.parse(localStorage.getItem('loginLogs') || '[]');
+    
+    // إضافة السجل الجديد
+    loginLogs.push(logEntry);
+    
+    // الاحتفاظ بآخر 100 سجل فقط (لتجنب امتلاء localStorage)
+    if (loginLogs.length > 100) {
+        loginLogs = loginLogs.slice(-100);
+    }
+    
+    // حفظ السجلات
+    localStorage.setItem('loginLogs', JSON.stringify(loginLogs));
+    
+    console.log('✅ تم تسجيل محاولة الدخول:', logEntry);
+}
+
+function getLoginLogs() {
+    return JSON.parse(localStorage.getItem('loginLogs') || '[]');
+}
+
+function clearLoginLogs() {
+    localStorage.removeItem('loginLogs');
+    console.log('🗑️ تم مسح جميع السجلات');
+}
+
+function exportLoginLogs() {
+    const logs = getLoginLogs();
+    const csvContent = [
+        ['المستخدم', 'الدور', 'النجاح', 'التاريخ', 'الوقت'].join(','),
+        ...logs.map(log => [
+            log.username,
+            log.role,
+            log.success ? 'نعم' : 'لا',
+            log.date,
+            log.time
+        ].join(','))
+    ].join('\n');
+    
+    return csvContent;
+}
+
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', function() {

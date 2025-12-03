@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&family=Sora:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
+    <script src="translations.js"></script>
     <style>
         :root {
             --primary-color: #2C3E50;
@@ -190,6 +191,102 @@
             background: linear-gradient(90deg, var(--mother-color), var(--secondary-color));
             border-radius: 4px;
             transition: width 0.5s ease;
+        }
+
+        /* Dark Mode CSS */
+        html.dark {
+            --background-light: #1a1a1a;
+            --surface-dark: #2a2a2a;
+            --text-light: #e0e0e0;
+        }
+
+        html.dark body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        html.dark .bg-warm-beige,
+        html.dark .bg-white {
+            background-color: #2a2a2a;
+        }
+
+        html.dark .bg-white\/90 {
+            background-color: rgba(42, 42, 42, 0.9);
+        }
+
+        html.dark .text-deep-brown,
+        html.dark .text-gentle-gray,
+        html.dark .text-gray-700,
+        html.dark .text-gray-600,
+        html.dark .text-gray-500 {
+            color: #d0d0d0;
+        }
+
+        html.dark .border-gray-300,
+        html.dark .border-gray-200 {
+            border-color: #444;
+        }
+
+        html.dark .shadow-lg,
+        html.dark .shadow-md {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        html.dark .tool-card,
+        html.dark .feature-card,
+        html.dark .card {
+            background-color: #2a2a2a;
+            border-color: #444;
+        }
+
+        html.dark .tool-icon {
+            background-color: #3a3a3a;
+        }
+
+        html.dark input[type="text"],
+        html.dark input[type="email"],
+        html.dark input[type="search"],
+        html.dark select,
+        html.dark textarea {
+            background-color: #3a3a3a;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+
+        html.dark input::placeholder,
+        html.dark textarea::placeholder {
+            color: #999;
+        }
+
+        html.dark .btn-primary,
+        html.dark .btn-secondary {
+            background-color: #c41e3a;
+            color: white;
+        }
+
+        html.dark .btn-primary:hover,
+        html.dark .btn-secondary:hover {
+            background-color: #a01830;
+        }
+
+        html.dark .progress-bar {
+            background: #444;
+        }
+
+        html.dark .modal-content,
+        html.dark .dialog {
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        html.dark .modal-header,
+        html.dark .card-header {
+            background-color: #3a3a3a;
+            border-color: #444;
+        }
+
+        html.dark canvas {
+            filter: invert(0.9);
         }
     </style>
 </head>

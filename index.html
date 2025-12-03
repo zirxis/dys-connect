@@ -15,6 +15,7 @@
     <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
+    <script src="translations.js"></script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -135,6 +136,116 @@
             opacity: 1;
             transform: translateY(0);
         }
+        
+        .language-toggle {
+            display: inline-flex;
+            gap: 8px;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #E85A4F;
+        }
+        
+        .lang-btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: #8B4513;
+        }
+        
+        .lang-btn.active {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .lang-btn:hover:not(.active) {
+            background: rgba(232, 90, 79, 0.1);
+            color: #C41E3A;
+            transform: translateY(-2px);
+        }
+        
+        /* Dark Mode Styles */
+        html.dark {
+            color-scheme: dark;
+        }
+        
+        html.dark body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        html.dark .bg-white {
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+        }
+        
+        html.dark .bg-warm-beige {
+            background-color: #1f1f1f;
+        }
+        
+        html.dark .bg-soft-cream {
+            background-color: #2a2a2a;
+        }
+        
+        html.dark .text-deep-brown {
+            color: #d0d0d0;
+        }
+        
+        html.dark .text-gentle-gray {
+            color: #b0b0b0;
+        }
+        
+        html.dark .border-gray-200 {
+            border-color: #444;
+        }
+        
+        html.dark .shadow-lg {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        html.dark nav {
+            background-color: rgba(30, 30, 30, 0.95);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Typed.js cursor styling with RTL support */
+        #typed-text {
+            display: inline-block;
+            font-weight: bold;
+            color: #C41E3A;
+        }
+
+        .typed-cursor {
+            font-weight: bold;
+            color: #C41E3A;
+            animation: typewriter-cursor 0.7s infinite;
+        }
+
+        @keyframes typewriter-cursor {
+            0%, 49% {
+                opacity: 1;
+            }
+            50%, 100% {
+                opacity: 0;
+            }
+        }
+
+        /* RTL support for typed element */
+        html[dir="rtl"] #typed-text {
+            text-align: right;
+        }
+
+        html[dir="ltr"] #typed-text {
+            text-align: left;
+        }
     </style>
 </head>
 <body class="bg-warm-beige">
@@ -147,11 +258,27 @@
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#home" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الرئيسية</a>
-                        <a href="#features" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">المميزات</a>
-                        <a href="#roles" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">الأدوار</a>
-                        <a href="dashboard.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">لوحة التحكم</a>
-                        <a href="plans.html" class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium">الأسعار</a>
+                        <a href="#home" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors" data-translate="home">الرئيسية</a>
+                        <a href="#features" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors" data-translate="features">المميزات</a>
+                        <a href="#roles" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors" data-translate="roles">الأدوار</a>
+                        <a href="dashboard.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors" data-translate="dashboard">لوحة التحكم</a>
+                        <a href="plans.html" class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium" data-translate="pricing">الأسعار</a>
+                        <a href="admin-logs.html" class="text-deep-brown hover:text-primary-red px-3 py-2 rounded-md text-sm font-medium transition-colors">📊 السجلات</a>
+                        
+                        <!-- Language Toggle Button -->
+                        <div class="language-toggle ml-4">
+                            <button class="lang-btn active" id="ar-btn" onclick="setLanguage('ar')">
+                                🇩🇿 العربية
+                            </button>
+                            <button class="lang-btn" id="fr-btn" onclick="setLanguage('fr')">
+                                🇫🇷 Français
+                            </button>
+                        </div>
+                        
+                        <!-- Dark Mode Toggle Button -->
+                        <button class="lang-btn ml-2 px-3 py-2" id="theme-btn" data-theme-btn onclick="toggleTheme()" title="تبديل الوضع الداكن">
+                            🌙 الوضع الداكن
+                        </button>
                     </div>
                 </div>
                 <div class="md:hidden">
@@ -167,11 +294,23 @@
         <!-- Mobile menu -->
         <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="#home" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">الرئيسية</a>
-                <a href="#features" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">المميزات</a>
-                <a href="#roles" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">الأدوار</a>
-                <a href="dashboard.html" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium">لوحة التحكم</a>
-                <a href="plans.html" class="btn-primary text-white block px-3 py-2 rounded-md text-base font-medium text-center">الأسعار</a>
+                <a href="#home" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium" data-translate="home">الرئيسية</a>
+                <a href="#features" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium" data-translate="features">المميزات</a>
+                <a href="#roles" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium" data-translate="roles">الأدوار</a>
+                <a href="dashboard.html" class="text-deep-brown hover:text-primary-red block px-3 py-2 rounded-md text-base font-medium" data-translate="dashboard">لوحة التحكم</a>
+                <a href="plans.html" class="btn-primary text-white block px-3 py-2 rounded-md text-base font-medium text-center" data-translate="pricing">الأسعار</a>
+                
+                <!-- Language Toggle Mobile -->
+                <div class="px-3 py-3 border-t">
+                    <div class="language-toggle w-full justify-center">
+                        <button class="lang-btn active" id="ar-btn-mobile" onclick="setLanguage('ar')">
+                            🇩🇿 العربية
+                        </button>
+                        <button class="lang-btn" id="fr-btn-mobile" onclick="setLanguage('fr')">
+                            🇫🇷 Français
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -184,18 +323,18 @@
                     <h1 class="text-5xl lg:text-6xl font-bold text-deep-brown font-cairo mb-6">
                         <span id="typed-text"></span>
                     </h1>
-                    <p class="text-xl text-gentle-gray font-amiri mb-8 leading-relaxed">
+                    <p class="text-xl text-gentle-gray font-amiri mb-8 leading-relaxed" data-translate="mainSubtitle">
                         منصة جزائرية متكاملة تربط بين الأمهات، المعلمين، المختصين، والمؤسسات لدعم التكفل الذكي والمبكر بالأطفال
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <button onclick="scrollToRoles()" class="btn-primary text-white px-8 py-4 rounded-lg text-lg font-medium">
+                        <button onclick="scrollToRoles()" class="btn-primary text-white px-8 py-4 rounded-lg text-lg font-medium" data-translate="ctaStart">
                             ابدأ الآن
                         </button>
-                        <a href="#features" class="border-2 border-primary-red text-primary-red hover:bg-primary-red hover:text-white px-8 py-4 rounded-lg text-lg font-medium transition-all">
+                        <a href="#features" class="border-2 border-primary-red text-primary-red hover:bg-primary-red hover:text-white px-8 py-4 rounded-lg text-lg font-medium transition-all" data-translate="ctaLearnMore">
                             تعرف أكثر
                         </a>
                          </button>
-                        <a href="ist.html" class="border-2 border-primary-red text-primary-red hover:bg-primary-red hover:text-white px-8 py-4 rounded-lg text-lg font-medium transition-all">
+                        <a href="ist.html" class="border-2 border-primary-red text-primary-red hover:bg-primary-red hover:text-white px-8 py-4 rounded-lg text-lg font-medium transition-all" data-translate="ctaDiagnostic">
                             استبيان تشخيصي
                         </a>
                     </div>
@@ -213,8 +352,8 @@
     <section id="features" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
-                <h2 class="text-4xl font-bold text-deep-brown font-cairo mb-4">لماذا تختار DYS-CONNECT؟</h2>
-                <p class="text-xl text-gentle-gray font-amiri max-w-3xl mx-auto">
+                <h2 class="text-4xl font-bold text-deep-brown font-cairo mb-4" data-translate="whyChoose">لماذا تختار DYS-CONNECT؟</h2>
+                <p class="text-xl text-gentle-gray font-amiri max-w-3xl mx-auto" data-translate="whyChooseDesc">
                     منصة متكاملة تجمع بين التكنولوجيا الحديثة والخبرة التربوية لدعم نمو وتطور الأطفال
                 </p>
             </div>
@@ -222,26 +361,26 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="text-center reveal card-hover bg-soft-cream p-8 rounded-2xl">
                     <div class="text-5xl mb-4 feature-icon">🧠</div>
-                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">أدوات ذكية</h3>
-                    <p class="text-gentle-gray font-amiri">تلخيص، خرائط ذهنية، تمارين تفاعلية مصممة خصيصاً لدعم التعلم</p>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3" data-translate="smartTools">أدوات ذكية</h3>
+                    <p class="text-gentle-gray font-amiri" data-translate="smartToolsDesc">تلخيص، خرائط ذهنية، تمارين تفاعلية مصممة خصيصاً لدعم التعلم</p>
                 </div>
                 
                 <div class="text-center reveal card-hover bg-soft-cream p-8 rounded-2xl">
                     <div class="text-5xl mb-4 feature-icon">📋</div>
-                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">استبيان علمي</h3>
-                    <p class="text-gentle-gray font-amiri">أدوات تقييم معيارية للرصد المبكر وتوجيه التكفل المناسب</p>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3" data-translate="scientificQuestionnaire">استبيان علمي</h3>
+                    <p class="text-gentle-gray font-amiri" data-translate="scientificQuestionnaireDesc">أدوات تقييم معيارية للرصد المبكر وتوجيه التكفل المناسب</p>
                 </div>
                 
                 <div class="text-center reveal card-hover bg-soft-cream p-8 rounded-2xl">
                     <div class="text-5xl mb-4 feature-icon">🗺️</div>
-                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">خريطة تفاعلية</h3>
-                    <p class="text-gentle-gray font-amiri">ربط جغرافي ذكي بين الفاعلين التربويين لضمان دعم محلي فعال</p>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3" data-translate="interactiveMap">خريطة تفاعلية</h3>
+                    <p class="text-gentle-gray font-amiri" data-translate="interactiveMapDesc">ربط جغرافي ذكي بين الفاعلين التربويين لضمان دعم محلي فعال</p>
                 </div>
                 
                 <div class="text-center reveal card-hover bg-soft-cream p-8 rounded-2xl">
                     <div class="text-5xl mb-4 feature-icon">📚</div>
-                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3">فضاء أكاديمي</h3>
-                    <p class="text-gentle-gray font-amiri">مكتبة علمية ومنصة بحث تربط الجامعة بالمجتمع المدني</p>
+                    <h3 class="text-xl font-bold text-deep-brown font-cairo mb-3" data-translate="academicSpace">فضاء أكاديمي</h3>
+                    <p class="text-gentle-gray font-amiri" data-translate="academicSpaceDesc">مكتبة علمية ومنصة بحث تربط الجامعة بالمجتمع المدني</p>
                 </div>
             </div>
         </div>
@@ -251,8 +390,8 @@
     <section id="roles" class="py-20 bg-warm-beige">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
-                <h2 class="text-4xl font-bold text-deep-brown font-cairo mb-4">اختر دورك المناسب</h2>
-                <p class="text-xl text-gentle-gray font-amiri max-w-3xl mx-auto">
+                <h2 class="text-4xl font-bold text-deep-brown font-cairo mb-4" data-translate="selectYourRole">اختر دورك المناسب</h2>
+                <p class="text-xl text-gentle-gray font-amiri max-w-3xl mx-auto" data-translate="selectYourRoleDesc">
                     كل مستخدم يرى ما يخصه فقط مع واجهة مخصصة حسب الدور والاحتياجات
                 </p>
             </div>
@@ -262,16 +401,16 @@
                 <div class="card-hover bg-white rounded-2xl p-8 shadow-lg reveal">
                     <div class="text-center mb-6">
                         <div class="text-6xl mb-4">👩‍👦</div>
-                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2">أم</h3>
-                        <p class="text-gentle-gray font-amiri">أدوات منزلية، متابعة الطفل، تواصل مع الفريق</p>
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2" data-role-name="mother" data-translate="mother">أم</h3>
+                        <p class="text-gentle-gray font-amiri" data-role-desc="mother" data-translate="motherDesc">أدوات منزلية، متابعة الطفل، تواصل مع الفريق</p>
                     </div>
-                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri">
+                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri" data-role-features="mother">
                         <li>• أدوات تعليمية ذكية</li>
                         <li>• متابعة تقدم الطفل</li>
                         <li>• تواصل مباشر مع المعلم</li>
                         <li>• جدولة الجلسات</li>
                     </ul>
-                    <button onclick="selectRole('mother')" class="w-full btn-primary text-white py-3 rounded-lg font-medium">
+                    <button onclick="selectRole('mother')" class="w-full btn-primary text-white py-3 rounded-lg font-medium" data-translate="login">
                         اختيار
                     </button>
                 </div>
@@ -280,16 +419,16 @@
                 <div class="card-hover bg-white rounded-2xl p-8 shadow-lg reveal">
                     <div class="text-center mb-6">
                         <div class="text-6xl mb-4">🧑‍🏫</div>
-                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2">معلم</h3>
-                        <p class="text-gentle-gray font-amiri">استبيان، توصية، متابعة صفية</p>
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2" data-role-name="teacher" data-translate="teacher">معلم</h3>
+                        <p class="text-gentle-gray font-amiri" data-role-desc="teacher" data-translate="teacherDesc">استبيان، توصية، متابعة صفية</p>
                     </div>
-                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri">
+                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri" data-role-features="teacher">
                         <li>• استبيان رصد مبكر</li>
                         <li>• إدارة قائمة التلاميذ</li>
                         <li>• توصيات تربوية</li>
                         <li>• تواصل مع الفريق</li>
                     </ul>
-                    <button onclick="selectRole('teacher')" class="w-full btn-primary text-white py-3 rounded-lg font-medium">
+                    <button onclick="selectRole('teacher')" class="w-full btn-primary text-white py-3 rounded-lg font-medium" data-translate="login">
                         اختيار
                     </button>
                 </div>
@@ -298,16 +437,16 @@
                 <div class="card-hover bg-white rounded-2xl p-8 shadow-lg reveal">
                     <div class="text-center mb-6">
                         <div class="text-6xl mb-4">🧠</div>
-                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2">مختص</h3>
-                        <p class="text-gentle-gray font-amiri">إدارة الحالات، جلسات، تقارير</p>
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2" data-role-name="specialist" data-translate="specialist">مختص</h3>
+                        <p class="text-gentle-gray font-amiri" data-role-desc="specialist" data-translate="specialistDesc">إدارة الحالات، جلسات، تقارير</p>
                     </div>
-                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri">
+                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri" data-role-features="specialist">
                         <li>• استلام الحالات المحالة</li>
                         <li>• إعداد خطط التكفل</li>
                         <li>• تقارير مهنية</li>
                         <li>• تقويم الجلسات</li>
                     </ul>
-                    <button onclick="selectRole('specialist')" class="w-full btn-primary text-white py-3 rounded-lg font-medium">
+                    <button onclick="selectRole('specialist')" class="w-full btn-primary text-white py-3 rounded-lg font-medium" data-translate="login">
                         اختيار
                     </button>
                 </div>
@@ -316,16 +455,16 @@
                 <div class="card-hover bg-white rounded-2xl p-8 shadow-lg reveal">
                     <div class="text-center mb-6">
                         <div class="text-6xl mb-4">🏫</div>
-                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2">مؤسسة</h3>
-                        <p class="text-gentle-gray font-amiri">إدارة الفريق، تقارير، إشعارات</p>
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2" data-role-name="institution" data-translate="institution">مؤسسة</h3>
+                        <p class="text-gentle-gray font-amiri" data-role-desc="institution" data-translate="institutionDesc">إدارة الفريق، تقارير، إشعارات</p>
                     </div>
-                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri">
+                    <ul class="text-right mb-8 space-y-2 text-gentle-gray font-amiri" data-role-features="institution">
                         <li>• إدارة الفريق التربوي</li>
                         <li>• تقارير إجمالية</li>
                         <li>• إشعارات جماعية</li>
                         <li>• تخصيص الحسابات</li>
                     </ul>
-                    <button onclick="selectRole('institution')" class="w-full btn-primary text-white py-3 rounded-lg font-medium">
+                    <button onclick="selectRole('institution')" class="w-full btn-primary text-white py-3 rounded-lg font-medium" data-translate="login">
                         اختيار
                     </button>
                 </div>
@@ -334,11 +473,11 @@
                 <div class="card-hover bg-white rounded-2xl p-8 shadow-lg reveal lg:col-span-2 md:col-span-1">
                     <div class="text-center mb-6">
                         <div class="text-6xl mb-4">🎓</div>
-                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2">باحث</h3>
-                        <p class="text-gentle-gray font-amiri">طلبات بحث، موافقات، تواصل أكاديمي</p>
+                        <h3 class="text-2xl font-bold text-deep-brown font-cairo mb-2" data-role-name="researcher" data-translate="researcher">باحث</h3>
+                        <p class="text-gentle-gray font-amiri" data-role-desc="researcher" data-translate="researcherDesc">طلبات بحث، موافقات، تواصل أكاديمي</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                        <ul class="text-right space-y-2 text-gentle-gray font-amiri">
+                        <ul class="text-right space-y-2 text-gentle-gray font-amiri" data-role-features="researcher">
                             <li>• تقديم طلبات بحث</li>
                             <li>• الحصول على موافقات أخلاقية</li>
                         </ul>
@@ -347,7 +486,7 @@
                             <li>• مكتبة علمية متخصصة</li>
                         </ul>
                     </div>
-                    <button onclick="selectRole('researcher')" class="w-full btn-primary text-white py-3 rounded-lg font-medium">
+                    <button onclick="selectRole('researcher')" class="w-full btn-primary text-white py-3 rounded-lg font-medium" data-translate="login">
                         اختيار
                     </button>
                 </div>
@@ -359,26 +498,26 @@
     <section class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
-                <h2 class="text-4xl font-bold text-deep-brown font-cairo mb-4">إحصائيات المنصة</h2>
-                <p class="text-xl text-gentle-gray font-amiri">أرقام تظهر تأثيرنا في المجتمع التربوي</p>
+                <h2 class="text-4xl font-bold text-deep-brown font-cairo mb-4" data-translate="statistics">إحصائيات المنصة</h2>
+                <p class="text-xl text-gentle-gray font-amiri" data-translate="statisticsDesc">أرقام تظهر تأثيرنا في المجتمع التربوي</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="text-center reveal">
                     <div class="text-4xl font-bold text-primary-red font-cairo mb-2" data-count="1500">0</div>
-                    <p class="text-gentle-gray font-amiri">مستخدم نشط</p>
+                    <p class="text-gentle-gray font-amiri" data-stats-label="activeUsers">مستخدم نشط</p>
                 </div>
                 <div class="text-center reveal">
                     <div class="text-4xl font-bold text-primary-red font-cairo mb-2" data-count="850">0</div>
-                    <p class="text-gentle-gray font-amiri">طفل مستفيد</p>
+                    <p class="text-gentle-gray font-amiri" data-stats-label="benefitedChildren">طفل مستفيد</p>
                 </div>
                 <div class="text-center reveal">
                     <div class="text-4xl font-bold text-primary-red font-cairo mb-2" data-count="120">0</div>
-                    <p class="text-gentle-gray font-amiri">مختص متصل</p>
+                    <p class="text-gentle-gray font-amiri" data-stats-label="connectedSpecialists">مختص متصل</p>
                 </div>
                 <div class="text-center reveal">
                     <div class="text-4xl font-bold text-primary-red font-cairo mb-2" data-count="45">0</div>
-                    <p class="text-gentle-gray font-amiri">مؤسسة شريكة</p>
+                    <p class="text-gentle-gray font-amiri" data-stats-label="partnerInstitutions">مؤسسة شريكة</p>
                 </div>
             </div>
         </div>

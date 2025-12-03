@@ -13,6 +13,7 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="translations.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -116,6 +117,97 @@
             background: linear-gradient(135deg, #A01729 0%, #D64541 100%);
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(196, 30, 58, 0.3);
+        }
+        
+        .language-toggle-login {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 50;
+            display: inline-flex;
+            gap: 8px;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #E85A4F;
+        }
+        
+        .lang-btn-login {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: #8B4513;
+        }
+        
+        .lang-btn-login.active {
+            background: linear-gradient(135deg, #C41E3A 0%, #E85A4F 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .lang-btn-login:hover:not(.active) {
+            background: rgba(232, 90, 79, 0.1);
+            color: #C41E3A;
+            transform: translateY(-2px);
+        }
+        
+        /* Dark Mode Styles for Login */
+        html.dark {
+            color-scheme: dark;
+        }
+        
+        html.dark body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        html.dark .login-card {
+            background-color: #2a2a2a;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        html.dark .logo-section h1 {
+            color: #ff6b6b;
+        }
+        
+        html.dark .logo-section p {
+            color: #b0b0b0;
+        }
+        
+        html.dark .input-group input {
+            background-color: #3a3a3a;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+        
+        html.dark .input-group input:focus {
+            border-color: #C41E3A;
+            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.2);
+        }
+        
+        html.dark .demo-credentials {
+            border-right-color: #F28B30;
+        }
+        
+        html.dark .demo-account {
+            background-color: #3a3a3a;
+            color: #b0b0b0;
+        }
+        
+        html.dark .demo-account:hover {
+            background-color: #444;
+        }
+        
+        html.dark .language-toggle-login {
+            background: rgba(30, 30, 30, 0.95);
+            border-color: #C41E3A;
         }
         
         .btn-login:active {
@@ -239,12 +331,25 @@
     </style>
 </head>
 <body class="bg-warm-beige">
+    <!-- Language Toggle Button -->
+    <div class="language-toggle-login">
+        <button class="lang-btn-login active" id="ar-btn-login" onclick="setLanguage('ar')">
+            🇩🇿 العربية
+        </button>
+        <button class="lang-btn-login" id="fr-btn-login" onclick="setLanguage('fr')">
+            🇫🇷 Français
+        </button>
+        <button class="lang-btn-login" id="theme-btn-login" data-theme-btn onclick="toggleTheme()" style="margin-right: 8px;">
+            🌙
+        </button>
+    </div>
+    
     <div class="login-container">
         <div class="login-card">
             <!-- Logo Section -->
             <div class="logo-section">
                 <h1>DYS-CONNECT</h1>
-                <p>منصة التكفل الذكي والمبكر بالأطفال</p>
+                <p data-translate="mainSubtitle">منصة التكفل الذكي والمبكر بالأطفال</p>
             </div>
             
             <!-- Login Form -->

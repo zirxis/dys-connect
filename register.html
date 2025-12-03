@@ -13,6 +13,7 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="translations.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -101,6 +102,38 @@
             color: #28A745;
             font-size: 0.875rem;
             margin-top: 0.25rem;
+        }
+        
+        /* Dark Mode Styles */
+        html.dark {
+            color-scheme: dark;
+        }
+        
+        html.dark body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        html.dark .bg-white {
+            background-color: #2a2a2a;
+        }
+        
+        html.dark .text-deep-brown {
+            color: #d0d0d0;
+        }
+        
+        html.dark .text-gentle-gray {
+            color: #b0b0b0;
+        }
+        
+        html.dark .border-gray-200 {
+            border-color: #444;
+        }
+        
+        html.dark input, html.dark select {
+            background-color: #3a3a3a;
+            border-color: #555;
+            color: #e0e0e0;
         }
     </style>
 </head>

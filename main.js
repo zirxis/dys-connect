@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeMessages();
     initializePlans();
     initializeWelcomeModal();
+    updateLanguageButtonStates();
 });
 
 // Welcome Modal functionality
@@ -61,15 +62,20 @@ window.scrollToFeaturesFromModal = function() {
 };
 
 // Typewriter effect for hero section
+let typedInstance = null;
+
 function initializeTypewriter() {
     const typedElement = document.getElementById('typed-text');
     if (typedElement) {
-        const typed = new Typed('#typed-text', {
-            strings: [
-                'مرحبًا بك في DYS-CONNECT',
-                'حيث يبدأ التكفل الذكي',
-                'والدعم المبكر للأطفال'
-            ],
+        // Destroy previous instance if it exists
+        if (typedInstance) {
+            typedInstance.destroy();
+        }
+        
+        const strings = getTypewriterStrings();
+        
+        typedInstance = new Typed('#typed-text', {
+            strings: strings,
             typeSpeed: 80,
             backSpeed: 50,
             backDelay: 2000,
@@ -78,6 +84,34 @@ function initializeTypewriter() {
             showCursor: true,
             cursorChar: '|'
         });
+    }
+}
+
+function getTypewriterStrings() {
+    const currentLang = localStorage.getItem('currentLanguage') || 'ar';
+    
+    // محاولة الحصول على الترجمات من translations object إذا كان متاحاً
+    if (typeof getTranslation === 'function') {
+        return [
+            getTranslation('typewriterLine1'),
+            getTranslation('typewriterLine2'),
+            getTranslation('typewriterLine3')
+        ];
+    }
+    
+    // بديل: استخدام النصوص المباشرة
+    if (currentLang === 'fr') {
+        return [
+            'Bienvenue sur DYS-CONNECT',
+            'Où commence la prise en charge intelligente',
+            'Et le soutien précoce des enfants'
+        ];
+    } else {
+        return [
+            'مرحبًا بك في DYS-CONNECT',
+            'حيث يبدأ التكفل الذكي',
+            'والدعم المبكر للأطفال'
+        ];
     }
 }
 
@@ -575,4 +609,50 @@ window.selectRole = window.selectRole;
 window.scrollToRoles = scrollToRoles;
 window.requestContact = requestContact;
 window.closeWelcomeModal = closeWelcomeModal;
+
+// =====================================================
+// Language Switching Support
+// =====================================================
+
+function updateLanguageButtonStates() {
+    const currentLang = localStorage.getItem('currentLanguage') || 'ar';
+    
+    // Update desktop buttons - try both naming conventions
+    let arBtn = document.getElementById('ar-btn') || document.getElementById('lang-ar');
+    let frBtn = document.getElementById('fr-btn') || document.getElementById('lang-fr');
+    
+    if (arBtn && frBtn) {
+        if (currentLang === 'ar') {
+            arBtn.classList.add('active');
+            frBtn.classList.remove('active');
+        } else {
+            frBtn.classList.add('active');
+            arBtn.classList.remove('active');
+        }
+    }
+    
+    // Update mobile buttons
+    const arBtnMobile = document.getElementById('ar-btn-mobile');
+    const frBtnMobile = document.getElementById('fr-btn-mobile');
+    
+    if (arBtnMobile && frBtnMobile) {
+        if (currentLang === 'ar') {
+            arBtnMobile.classList.add('active');
+            frBtnMobile.classList.remove('active');
+        } else {
+            frBtnMobile.classList.add('active');
+            arBtnMobile.classList.remove('active');
+        }
+    }
+}
+
+// Override setLanguage to update button states
+const originalSetLanguage = window.setLanguage;
+window.setLanguage = function(lang) {
+    originalSetLanguage(lang);
+    updateLanguageButtonStates();
+};
+
+// Export toggleTheme for global access
+window.toggleTheme = toggleTheme;
 window.scrollToFeaturesFromModal = scrollToFeaturesFromModal;

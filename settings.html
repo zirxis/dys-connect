@@ -13,6 +13,7 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="translations.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -193,6 +194,36 @@
         
         .mobile-menu.active {
             transform: translateX(0);
+        }
+        
+        /* Dark Mode Styles */
+        html.dark {
+            color-scheme: dark;
+        }
+        
+        html.dark body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        html.dark .bg-white {
+            background-color: #2a2a2a;
+        }
+        
+        html.dark .settings-card {
+            background: #2a2a2a;
+            border-color: rgba(196, 30, 58, 0.2);
+        }
+        
+        html.dark .modal-content {
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+        }
+        
+        html.dark input, html.dark select {
+            background-color: #3a3a3a;
+            border-color: #555;
+            color: #e0e0e0;
         }
     </style>
 </head>

@@ -14,6 +14,7 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="translations.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -118,6 +119,125 @@
         .mobile-menu.active {
             transform: translateX(0);
         }
+
+        /* Dark Mode CSS */
+        html.dark body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        html.dark .bg-warm-beige,
+        html.dark .bg-white {
+            background-color: #2a2a2a;
+        }
+
+        html.dark .bg-white\/90 {
+            background-color: rgba(42, 42, 42, 0.9);
+        }
+
+        html.dark .text-deep-brown,
+        html.dark .text-gentle-gray,
+        html.dark .text-gray-700,
+        html.dark .text-gray-600,
+        html.dark .text-gray-500 {
+            color: #d0d0d0;
+        }
+
+        html.dark .border-gray-300,
+        html.dark .border-gray-200 {
+            border-color: #444;
+        }
+
+        html.dark .shadow-lg,
+        html.dark .shadow-md {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        html.dark .sidebar {
+            background-color: #2a2a2a;
+            border-color: #444;
+        }
+
+        html.dark .stat-card,
+        html.dark .dashboard-card,
+        html.dark .card {
+            background-color: #2a2a2a;
+            border-color: #444;
+        }
+
+        html.dark .card-header {
+            background-color: #3a3a3a;
+            border-color: #444;
+        }
+
+        html.dark .stat-value {
+            color: #fff;
+        }
+
+        html.dark .stat-label {
+            color: #b0b0b0;
+        }
+
+        html.dark input[type="text"],
+        html.dark input[type="email"],
+        html.dark input[type="password"],
+        html.dark input[type="number"],
+        html.dark input[type="search"],
+        html.dark select,
+        html.dark textarea {
+            background-color: #3a3a3a;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+
+        html.dark input::placeholder,
+        html.dark textarea::placeholder {
+            color: #999;
+        }
+
+        html.dark .btn-primary,
+        html.dark .btn-secondary {
+            background-color: #c41e3a;
+            color: white;
+        }
+
+        html.dark .btn-primary:hover,
+        html.dark .btn-secondary:hover {
+            background-color: #a01830;
+        }
+
+        html.dark .modal-content,
+        html.dark .dialog {
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        html.dark .modal-header {
+            background-color: #3a3a3a;
+            border-color: #444;
+        }
+
+        html.dark .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        html.dark .notification-item {
+            background-color: #3a3a3a;
+            border-color: #555;
+        }
+
+        html.dark .list-item {
+            border-color: #444;
+        }
+
+        html.dark .badge {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+        }
+
+        html.dark .chart-container {
+            background-color: #2a2a2a;
+        }
     </style>
 </head>
 <body class="bg-warm-beige">
@@ -136,6 +256,13 @@
                 
                 <div class="flex items-center space-x-4">
                     
+                    <!-- Language & Theme Toggle -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <button onclick="setLanguage('ar')" class="lang-btn active px-3 py-1 rounded text-sm font-medium" id="ar-btn">🇩🇿 العربية</button>
+                        <button onclick="setLanguage('fr')" class="lang-btn px-3 py-1 rounded text-sm font-medium" id="fr-btn">🇫🇷 Français</button>
+                        <button onclick="toggleTheme()" class="theme-btn px-3 py-1 rounded text-sm font-medium">🌙</button>
+                    </div>
+                    
                     <!-- User Profile -->
                     <div class="relative">
                         <button id="profile-btn" class="flex items-center space-x-2 text-deep-brown hover:text-primary-red" onclick="toggleProfileMenu()">
@@ -151,14 +278,14 @@
                                 <p class="text-sm text-gentle-gray" id="profile-role"></p>
                                 <p class="font-medium text-deep-brown" id="profile-email"></p>
                             </div>
-                            <a href="#" onclick="goToSettings(event)" class="block px-4 py-2 text-deep-brown hover:bg-soft-cream transition-colors text-sm">
+                            <a href="#" onclick="goToSettings(event)" class="block px-4 py-2 text-deep-brown hover:bg-soft-cream transition-colors text-sm" data-translate="settings">
                                 ⚙️ الإعدادات
                             </a>
                             
                             <!-- Recent Users / Quick Switch Section -->
                             <div id="recent-users-menu" class="border-t border-gray-200"></div>
                             
-                            <a href="#" onclick="logout(event)" class="block px-4 py-2 text-red-600 hover:bg-soft-cream transition-colors text-sm border-t border-gray-200">
+                            <a href="#" onclick="logout(event)" class="block px-4 py-2 text-red-600 hover:bg-soft-cream transition-colors text-sm border-t border-gray-200" data-translate="logout">
                                 🚪 تسجيل الخروج
                             </a>
                         </div>
@@ -231,11 +358,11 @@
                 <div class="text-center mb-6">
                     <div id="sidebar-role-icon" class="text-4xl mb-2"></div>
                     <h3 id="sidebar-role-title" class="text-lg font-bold text-deep-brown font-cairo"></h3>
-                    <p class="text-sm text-gentle-gray font-amiri">لوحة التحكم</p>
+                    <p class="text-sm text-gentle-gray font-amiri" data-translate="dashboard">لوحة التحكم</p>
                 </div>
                 
                 <nav class="space-y-2">
-                    <a href="#" class="nav-item active flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                    <a href="#" class="nav-item active flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg" data-translate="home">
                         <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v0a2 2 0 01-2 2H10a2 2 0 01-2-2v0z" />
@@ -243,7 +370,7 @@
                         <span class="font-medium">الرئيسية</span>
                     </a>
                     
-                    <a href="map.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                    <a href="map.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg" data-translate="interactiveMap">
                         <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -251,14 +378,14 @@
                         <span class="font-medium">الخريطة التفاعلية</span>
                     </a>
                     
-                    <a href="library.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                    <a href="library.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg" data-translate="academicSpace">
                         <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                         <span class="font-medium">المكتبة العلمية</span>
                     </a>
                     
-                    <a href="messages.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                    <a href="messages.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg" data-translate="notifications">
                         <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
@@ -266,7 +393,7 @@
                         <span class="notification-dot w-2 h-2 bg-red-500 rounded-full mr-auto"></span>
                     </a>
                     
-                    <a href="settings.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg">
+                    <a href="settings.html" class="nav-item flex items-center px-4 py-3 text-deep-brown hover:text-primary-red rounded-lg" data-translate="settings">
                         <svg class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -282,8 +409,8 @@
             <main class="p-6">
                 <!-- Dashboard Header -->
                 <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-deep-brown font-cairo mb-2">لوحة التحكم</h1>
-                    <p class="text-gentle-gray font-amiri">مرحباً بك في منصة DYS-CONNECT</p>
+                    <h1 class="text-3xl font-bold text-deep-brown font-cairo mb-2" data-translate="dashboardTitle">لوحة التحكم</h1>
+                    <p class="text-gentle-gray font-amiri" data-translate="welcomeMessage">مرحباً بك في منصة DYS-CONNECT</p>
                 </div>
 
                 <!-- Dashboard Content -->
@@ -298,7 +425,7 @@
     <footer class="bg-deep-brown text-white py-8 md:mr-64">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <p class="text-sm font-amiri">© 2025 DYS-CONNECT. جميع الحقوق محفوظة.</p>
+                <p class="text-sm font-amiri" data-translate="allRightsReserved">© 2025 DYS-CONNECT. جميع الحقوق محفوظة.</p>
             </div>
         </div>
     </footer>
